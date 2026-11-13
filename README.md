@@ -2,6 +2,10 @@
 
 A native SwiftUI + SwiftData iOS app to track assignments, homework, and exams.
 
+> **There's also a web version** in [`web/`](web/README.md). It has the same
+> design and features, and installs on an iPhone from Safari (Add to Home
+> Screen) with no Mac or Apple account needed.
+
 ## Features
 - **Assignments** dashboard — all homework + projects, grouped Overdue / This Week / Later, sortable, searchable.
 - **Homework** dashboard — homework only.

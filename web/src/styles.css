@@ -1,0 +1,1415 @@
+/* iOS look-alike design system. Colours are Apple's system colours; sizes are
+   the iPhone defaults (17pt body, 34pt large titles, 44pt touch targets). */
+
+:root {
+  --accent: #007aff;
+  --on-accent: #ffffff;
+
+  --bg: #ffffff;
+  --bg-grouped: #f2f2f7;
+  --bg-cell: #ffffff;
+  --bg-grouped-elevated: #f2f2f7;
+  --bg-cell-elevated: #ffffff;
+  --bg-elevated: #ffffff;
+  --cell-highlight: #d1d1d6;
+
+  --label: #000000;
+  --label-2: rgba(60, 60, 67, 0.6);
+  --label-3: rgba(60, 60, 67, 0.3);
+  --separator: rgba(60, 60, 67, 0.29);
+
+  --fill: rgba(120, 120, 128, 0.2);
+  --fill-2: rgba(120, 120, 128, 0.16);
+  --fill-3: rgba(118, 118, 128, 0.12);
+  --toggle-off: #e9e9ea;
+
+  --red: #ff3b30;
+  --orange: #ff9500;
+  --green: #34c759;
+  --gray: #8e8e93;
+
+  --glass-bg: rgba(255, 255, 255, 0.62);
+  --glass-border: rgba(255, 255, 255, 0.75);
+  --glass-shadow: 0 4px 18px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --bar-bg: rgba(249, 249, 249, 0.82);
+  --dim: rgba(0, 0, 0, 0.2);
+  --segment-thumb: #ffffff;
+
+  --cell-radius: 24px;
+  --margin: 16px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --nav-height: 54px;
+  --tabbar-height: 62px;
+  --tabbar-bottom: max(10px, calc(var(--safe-bottom) - 12px));
+
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-rounded: ui-rounded, "SF Pro Rounded", var(--font);
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --spring: cubic-bezier(0.32, 0.72, 0, 1);
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #000000;
+    --bg-grouped: #000000;
+    --bg-cell: #1c1c1e;
+    --bg-grouped-elevated: #1c1c1e;
+    --bg-cell-elevated: #2c2c2e;
+    --bg-elevated: #1c1c1e;
+    --cell-highlight: #3a3a3c;
+    --label: #ffffff;
+    --label-2: rgba(235, 235, 245, 0.6);
+    --label-3: rgba(235, 235, 245, 0.3);
+    --separator: rgba(84, 84, 88, 0.65);
+    --fill: rgba(120, 120, 128, 0.36);
+    --fill-2: rgba(120, 120, 128, 0.32);
+    --fill-3: rgba(118, 118, 128, 0.24);
+    --toggle-off: #39393d;
+    --red: #ff453a;
+    --orange: #ff9f0a;
+    --green: #30d158;
+    --glass-bg: rgba(44, 44, 46, 0.58);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+    --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    --bar-bg: rgba(28, 28, 30, 0.82);
+    --dim: rgba(0, 0, 0, 0.48);
+    --segment-thumb: #636366;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #000000;
+  --bg-grouped: #000000;
+  --bg-cell: #1c1c1e;
+  --bg-grouped-elevated: #1c1c1e;
+  --bg-cell-elevated: #2c2c2e;
+  --bg-elevated: #1c1c1e;
+  --cell-highlight: #3a3a3c;
+  --label: #ffffff;
+  --label-2: rgba(235, 235, 245, 0.6);
+  --label-3: rgba(235, 235, 245, 0.3);
+  --separator: rgba(84, 84, 88, 0.65);
+  --fill: rgba(120, 120, 128, 0.36);
+  --fill-2: rgba(120, 120, 128, 0.32);
+  --fill-3: rgba(118, 118, 128, 0.24);
+  --toggle-off: #39393d;
+  --red: #ff453a;
+  --orange: #ff9f0a;
+  --green: #30d158;
+  --glass-bg: rgba(44, 44, 46, 0.58);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --bar-bg: rgba(28, 28, 30, 0.82);
+  --dim: rgba(0, 0, 0, 0.48);
+  --segment-thumb: #636366;
+}
+
+@media (min-width: 414px) {
+  :root {
+    --margin: 20px;
+  }
+}
+
+/* ---------- Base ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.29;
+  letter-spacing: -0.41px;
+  color: var(--label);
+  background: var(--bg-grouped);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+  overscroll-behavior: none;
+}
+
+button {
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+}
+
+svg {
+  flex-shrink: 0;
+}
+
+.app {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--bg-grouped);
+}
+
+/* ---------- Tabs and navigation stacks ---------- */
+
+.tab-pane {
+  position: absolute;
+  inset: 0;
+}
+
+.tab-pane[hidden] {
+  display: block;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.screen {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-grouped);
+  overflow: hidden;
+}
+
+.screen.plain {
+  background: var(--bg);
+}
+
+@keyframes push-in {
+  from {
+    transform: translateX(100%);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0);
+  }
+  to {
+    transform: translateX(0);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.12);
+  }
+}
+
+@keyframes push-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes cover {
+  to {
+    transform: translateX(-30%);
+    filter: brightness(0.92);
+  }
+}
+
+@keyframes uncover {
+  from {
+    transform: translateX(-30%);
+    filter: brightness(0.92);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.scroll {
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-top: calc(var(--safe-top) + var(--nav-height));
+  padding-bottom: calc(var(--tabbar-height) + var(--tabbar-bottom) + 32px);
+}
+
+.scroll.no-tabbar {
+  padding-bottom: calc(var(--safe-bottom) + 32px);
+}
+
+/* The bar: floating glass controls over a soft blurred edge, as on iOS 26. */
+.navbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  height: calc(var(--safe-top) + var(--nav-height));
+  padding: var(--safe-top) var(--margin) 0;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.navbar::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 -18px;
+  z-index: -1;
+  background: linear-gradient(var(--bg-grouped) 30%, transparent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  -webkit-mask-image: linear-gradient(#000 55%, transparent);
+  mask-image: linear-gradient(#000 55%, transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.plain > .navbar::before {
+  background: linear-gradient(var(--bg) 30%, transparent);
+}
+
+.navbar.scrolled::before {
+  opacity: 1;
+}
+
+.navbar > * {
+  pointer-events: auto;
+}
+
+.navbar-leading,
+.navbar-trailing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.navbar-trailing {
+  justify-content: flex-end;
+}
+
+.navbar-title {
+  font-weight: 600;
+  font-size: 17px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60vw;
+  text-align: center;
+  transition: opacity 0.18s;
+}
+
+.navbar-title.hidden {
+  opacity: 0;
+}
+
+.large-title {
+  font-size: 34px;
+  line-height: 41px;
+  font-weight: 700;
+  letter-spacing: 0.37px;
+  margin: 2px var(--margin) 10px;
+}
+
+/* ---------- Liquid Glass buttons ---------- */
+
+.glass {
+  background: var(--glass-bg);
+  border: 0.5px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), var(--glass-highlight);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  backdrop-filter: blur(18px) saturate(180%);
+}
+
+.glass-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 22px;
+  color: var(--label);
+  transition: transform 0.2s var(--spring), opacity 0.2s;
+}
+
+.glass-button.text {
+  padding: 0 16px;
+  font-weight: 500;
+}
+
+.glass-button.prominent {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: transparent;
+  font-weight: 600;
+}
+
+.glass-button:active:not(:disabled) {
+  transform: scale(1.08);
+}
+
+.glass-button:disabled {
+  opacity: 0.4;
+}
+
+.glass-button.prominent:disabled {
+  background: var(--glass-bg);
+  color: var(--label);
+}
+
+/* ---------- Grouped lists (Form / insetGrouped List) ---------- */
+
+.list {
+  padding: 0 var(--margin);
+}
+
+.section {
+  margin-bottom: 30px;
+}
+
+.section-header {
+  padding: 0 16px 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--label-2);
+}
+
+.section-footer {
+  padding: 8px 16px 0;
+  font-size: 13px;
+  line-height: 18px;
+  letter-spacing: -0.08px;
+  color: var(--label-2);
+}
+
+.cells {
+  background: var(--bg-cell);
+  border-radius: var(--cell-radius);
+  overflow: hidden;
+}
+
+.cells.clear {
+  background: transparent;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 16px;
+  background: var(--bg-cell);
+}
+
+.cells.clear > .cell {
+  background: transparent;
+}
+
+.cell + .cell::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: var(--separator-inset, 16px);
+  right: 0;
+  height: 1px;
+  background: var(--separator);
+  transform: scaleY(0.5);
+  transform-origin: top;
+  /* Above a swipeable row's sliding content, which has its own background. */
+  z-index: 2;
+}
+
+.cells.clear > .cell + .cell::before {
+  display: none;
+}
+
+button.cell {
+  width: 100%;
+  text-align: start;
+}
+
+.cell.tappable {
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.cell.tappable:active {
+  background: var(--cell-highlight);
+  transition: none;
+}
+
+.cell.accent {
+  color: var(--accent);
+}
+
+.cell.destructive {
+  color: var(--red);
+  justify-content: center;
+}
+
+.cell.disabled {
+  color: var(--label-2);
+}
+
+.cell-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.cell-value {
+  color: var(--label-2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chevron {
+  color: var(--label-3);
+}
+
+.cell input.field {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 15px 0;
+  font-size: 17px;
+}
+
+.cell input.field::placeholder {
+  color: var(--label-3);
+}
+
+.row-icon {
+  color: var(--accent);
+  display: flex;
+}
+
+.secondary {
+  color: var(--label-2);
+}
+
+.tertiary {
+  color: var(--label-3);
+}
+
+.footnote {
+  font-size: 13px;
+  letter-spacing: -0.08px;
+}
+
+.caption {
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
+.caption2 {
+  font-size: 11px;
+  letter-spacing: 0.06px;
+}
+
+.subheadline {
+  font-size: 15px;
+  letter-spacing: -0.24px;
+}
+
+.headline {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.line-clamp-1,
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-1 {
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+.line-clamp-2 {
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+/* ---------- Swipe actions ---------- */
+
+.swipe {
+  padding: 0;
+  overflow: hidden;
+  display: block;
+  touch-action: pan-y;
+}
+
+.swipe-content {
+  position: relative;
+  z-index: 1;
+  background: var(--bg-cell);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 16px;
+  will-change: transform;
+}
+
+/* Dragging a row shouldn't select its text. */
+.swipe-content {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.swipe-content input {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.swipe-content.settling {
+  transition: transform 0.4s var(--spring);
+}
+
+.swipe-actions {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+}
+
+.swipe-actions.leading {
+  left: 0;
+}
+
+.swipe-actions.trailing {
+  right: 0;
+}
+
+.swipe-action {
+  width: 76px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ---------- Controls ---------- */
+
+.toggle {
+  position: relative;
+  width: 51px;
+  height: 31px;
+  border-radius: 16px;
+  background: var(--toggle-off);
+  transition: background-color 0.25s;
+  flex-shrink: 0;
+}
+
+.toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 3px 1px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s var(--spring), width 0.15s;
+}
+
+.toggle.on {
+  background: var(--accent);
+}
+
+.toggle.on::after {
+  transform: translateX(20px);
+}
+
+.toggle:active::after {
+  width: 33px;
+}
+
+.toggle.on:active::after {
+  transform: translateX(14px);
+}
+
+/* The compact date/time "pill" with a native picker hidden on top of it. */
+.pill-picker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--fill-3);
+  white-space: nowrap;
+}
+
+.native-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.segmented {
+  position: relative;
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--fill-3);
+  width: 100%;
+}
+
+.segmented-thumb {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  border-radius: 999px;
+  background: var(--segment-thumb);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04);
+  transition: transform 0.35s var(--spring);
+}
+
+.segmented button {
+  position: relative;
+  z-index: 1;
+  height: 30px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.segmented button.selected {
+  font-weight: 600;
+}
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 14px;
+  padding: 14px 0;
+  justify-items: center;
+}
+
+.swatch {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.swatch.selected::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 2px solid var(--label);
+  opacity: 0.4;
+}
+
+.prominent-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  padding: 0 22px;
+  border-radius: 25px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+
+.prominent-button:active {
+  opacity: 0.8;
+}
+
+.search {
+  margin: 0 var(--margin) 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 10px;
+  border-radius: 20px;
+  background: var(--fill-3);
+  color: var(--label-2);
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 17px;
+  color: var(--label);
+}
+
+.search input::placeholder {
+  color: var(--label-2);
+}
+
+.search input::-webkit-search-cancel-button {
+  display: none;
+}
+
+/* ---------- Checkbox ---------- */
+
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.28s cubic-bezier(0.34, 1.9, 0.5, 1);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.checkbox.pop {
+  transform: scale(1.35);
+}
+
+.checkbox svg {
+  display: block;
+}
+
+.checkbox.bounce span {
+  animation: bounce 0.45s var(--spring);
+}
+
+@keyframes bounce {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(0.82);
+  }
+  70% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ---------- Empty states (ContentUnavailableView) ---------- */
+
+.empty {
+  position: absolute;
+  inset: calc(var(--safe-top) + var(--nav-height) + 51px) 0
+    calc(var(--tabbar-height) + var(--tabbar-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 40px;
+  gap: 8px;
+}
+
+.empty-icon {
+  color: var(--label-2);
+  margin-bottom: 8px;
+}
+
+.empty-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.35px;
+}
+
+.empty-description {
+  color: var(--label-2);
+}
+
+.empty .prominent-button {
+  margin-top: 12px;
+}
+
+/* ---------- Tab bar (iOS 26 floating glass) ---------- */
+
+.tabbar {
+  position: fixed;
+  z-index: 50;
+  left: 50%;
+  bottom: var(--tabbar-bottom);
+  transform: translateX(-50%);
+  width: min(calc(100% - 2 * var(--margin) - 8px), 420px);
+  height: var(--tabbar-height);
+  border-radius: calc(var(--tabbar-height) / 2);
+  display: flex;
+  padding: 4px;
+}
+
+.tab {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border-radius: 999px;
+  color: var(--label);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  transition: color 0.2s, background-color 0.3s;
+}
+
+.tab.selected {
+  color: var(--accent);
+  background: var(--fill-3);
+}
+
+.tab:active {
+  transform: scale(0.96);
+}
+
+.tab-avatar {
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+/* ---------- Sheets ---------- */
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--dim);
+  animation: fade-in 0.35s ease both;
+}
+
+.sheet-backdrop.closing {
+  animation: fade-out 0.3s ease both;
+}
+
+.sheet {
+  --bg-grouped: var(--bg-grouped-elevated);
+  --bg-cell: var(--bg-cell-elevated);
+  position: fixed;
+  z-index: 101;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: calc(var(--safe-top) + 10px);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-grouped);
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 -2px 30px rgba(0, 0, 0, 0.12);
+  animation: sheet-in 0.5s var(--spring) both;
+  overflow: hidden;
+}
+
+.sheet.detent {
+  top: auto;
+  left: 8px;
+  right: 8px;
+  bottom: max(8px, var(--safe-bottom));
+  border-radius: 36px;
+  max-height: calc(100% - var(--safe-top) - 20px);
+}
+
+.sheet.plain {
+  background: var(--bg-elevated);
+}
+
+.sheet.closing {
+  animation: sheet-out 0.32s var(--spring) both;
+}
+
+.sheet.dragging {
+  animation: none;
+  transition: none;
+}
+
+.sheet.settling {
+  animation: none;
+  transition: transform 0.4s var(--spring);
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(105%);
+  }
+}
+
+@keyframes sheet-out {
+  to {
+    transform: translateY(105%);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+.sheet-nav {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px 8px;
+  touch-action: none;
+}
+
+.sheet-nav .navbar-title {
+  max-width: 50vw;
+}
+
+.sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-top: 8px;
+  padding-bottom: calc(var(--safe-bottom) + 24px);
+}
+
+.sheet.detent .sheet-body {
+  padding-bottom: 16px;
+}
+
+/* ---------- Wheel picker ---------- */
+
+.wheels {
+  position: relative;
+  display: flex;
+  height: 170px;
+}
+
+.wheels::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 50%;
+  height: 34px;
+  transform: translateY(-50%);
+  border-radius: 10px;
+  background: var(--fill-3);
+  pointer-events: none;
+}
+
+.wheel {
+  position: relative;
+  flex: 1;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(transparent, #000 35%, #000 65%, transparent);
+  mask-image: linear-gradient(transparent, #000 35%, #000 65%, transparent);
+  padding: 68px 0;
+}
+
+.wheel::-webkit-scrollbar {
+  display: none;
+}
+
+.wheel-item {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 21px;
+  scroll-snap-align: center;
+  color: var(--label-2);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.wheel-item.selected {
+  color: var(--label);
+}
+
+/* ---------- Menus and alerts ---------- */
+
+.menu-anchor {
+  position: relative;
+}
+
+.menu-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+}
+
+.menu {
+  position: absolute;
+  z-index: 201;
+  top: 52px;
+  left: 0;
+  min-width: 250px;
+  border-radius: 22px;
+  padding: 6px 0;
+  overflow: hidden;
+  transform-origin: top left;
+  animation: menu-in 0.3s var(--spring) both;
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+.menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 11px 18px;
+  text-align: start;
+}
+
+.menu-item:active:not(:disabled) {
+  background: var(--fill-3);
+}
+
+.menu-item:disabled {
+  color: var(--label-3);
+}
+
+.alert-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--dim);
+  animation: fade-in 0.2s ease both;
+}
+
+.alert {
+  width: min(300px, calc(100% - 64px));
+  border-radius: 30px;
+  padding: 22px 20px 16px;
+  text-align: center;
+  background: var(--bg-cell-elevated);
+  animation: alert-in 0.3s var(--spring) both;
+}
+
+@keyframes alert-in {
+  from {
+    transform: scale(1.12);
+    opacity: 0;
+  }
+}
+
+.alert-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.alert-message {
+  font-size: 15px;
+  color: var(--label-2);
+}
+
+.alert .prominent-button {
+  width: 100%;
+  margin-top: 18px;
+  height: 46px;
+}
+
+/* ---------- Note editor ---------- */
+
+.editor-wrap {
+  position: relative;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.editor-wrap .ProseMirror {
+  min-height: 100%;
+  padding: 12px 17px 96px;
+  outline: none;
+  font-size: 17px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.ProseMirror p,
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror ul,
+.ProseMirror ol,
+.ProseMirror blockquote {
+  margin: 0 0 4px;
+}
+
+.ProseMirror h1 {
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.ProseMirror h2 {
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.ProseMirror h3 {
+  font-size: 20px;
+  line-height: 25px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-inline-start: 22px;
+}
+
+.ProseMirror li > p {
+  margin: 0;
+}
+
+.ProseMirror blockquote {
+  padding-inline-start: 14px;
+  font-style: italic;
+  color: var(--label-2);
+}
+
+.ProseMirror code {
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+  background: var(--fill-2);
+  border-radius: 4px;
+  padding: 1px 3px;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--label-3);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.format-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  background: var(--bar-bg);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-top: 0.5px solid var(--separator);
+  padding-bottom: var(--keyboard-gap, var(--safe-bottom));
+  transition: padding-bottom 0.1s;
+}
+
+.format-bar-scroll {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.format-bar-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.format-button {
+  width: 38px;
+  height: 32px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.format-button.active {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.format-separator {
+  width: 1px;
+  height: 22px;
+  margin: 0 2px;
+  background: var(--separator);
+  flex-shrink: 0;
+}
+
+/* ---------- Misc ---------- */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.stack-entry {
+  position: absolute;
+  inset: 0;
+}
+
+.stack-entry[hidden] {
+  display: block;
+  visibility: hidden;
+}
+
+.stack-entry.push-enter {
+  animation: push-in 0.42s var(--spring) both;
+  z-index: 1;
+}
+
+.stack-entry.pop-exit {
+  animation: push-out 0.36s var(--spring) both;
+  z-index: 1;
+}
+
+.stack-entry.covered {
+  animation: cover 0.42s var(--spring) both;
+}
+
+.stack-entry.uncovered {
+  animation: uncover 0.36s var(--spring) both;
+}
+
+/* ---------- Settings: appearance picker ---------- */
+
+.appearance-picker {
+  position: relative;
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  height: 40px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--fill-2);
+}
+
+.appearance-slot {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc((100% - 6px) / 3);
+  transition: transform 0.35s var(--spring);
+}
+
+.appearance-indicator {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  animation: swell 0.35s ease;
+  box-shadow: 0 1.5px 3px rgba(0, 0, 0, 0.15), var(--glass-highlight);
+}
+
+/* Swells on the way across and settles back, the way the tab bar's
+   selection bubble does. */
+@keyframes swell {
+  45% {
+    transform: scale(1.18, 1.12);
+  }
+}
+
+.appearance-picker button {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 15px;
+  color: var(--label-2);
+}
+
+.appearance-picker button.selected {
+  color: var(--label);
+  font-weight: 600;
+}
+
+.tabbar.icons-only .tab {
+  gap: 0;
+}
