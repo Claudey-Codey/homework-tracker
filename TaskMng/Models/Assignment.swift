@@ -18,6 +18,10 @@ final class Assignment {
     @Relationship(deleteRule: .cascade, inverse: \StudyNote.assignment)
     var notes: [StudyNote] = []
 
+    /// Attached pictures. Deleting the assignment deletes them too.
+    @Relationship(deleteRule: .cascade, inverse: \ImageAttachment.assignment)
+    var images: [ImageAttachment] = []
+
     /// Any number of lead times. Deleting the assignment takes them with it.
     @Relationship(deleteRule: .cascade, inverse: \Reminder.assignment)
     var reminders: [Reminder] = []
@@ -53,6 +57,10 @@ final class Assignment {
 
     var sortedNotes: [StudyNote] {
         notes.sorted { $0.order < $1.order }
+    }
+
+    var sortedImages: [ImageAttachment] {
+        images.sorted { $0.order < $1.order }
     }
 
     var checklistDoneCount: Int {

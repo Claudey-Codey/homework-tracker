@@ -16,6 +16,7 @@ struct AssignmentFormView: View {
     @State private var hasTime: Bool
     @State private var subject: Subject?
     @State private var notes: [DraftNote]
+    @State private var images: [DraftImage]
     @State private var reminders: [DraftReminder]
     /// Held as plain drafts rather than live `ChecklistItem`s so a brand-new
     /// assignment (not yet inserted) can have a list, and Cancel really cancels.
@@ -36,6 +37,7 @@ struct AssignmentFormView: View {
         _hasTime = State(initialValue: assignment?.hasTime ?? false)
         _subject = State(initialValue: assignment?.subject)
         _notes = State(initialValue: (assignment?.sortedNotes ?? []).map { DraftNote(text: $0.text) })
+        _images = State(initialValue: (assignment?.sortedImages ?? []).map { DraftImage($0) })
         // Saved reminders win; an assignment from before multiple reminders
         // existed gets its single lead time folded in as the first one.
         let saved = (assignment?.sortedReminders ?? []).map {
@@ -79,7 +81,8 @@ struct AssignmentFormView: View {
                 NotesSection(
                     header: "Content",
                     emptyFooter: "Optional. Write down what the assignment asks for, or anything you need to remember.",
-                    notes: $notes)
+                    notes: $notes,
+                    images: $images)
 
                 Section {
                     ForEach($checklist) { $item in
@@ -255,6 +258,10 @@ struct AssignmentFormView: View {
             note.assignment = assignment
             context.insert(note)
         }
+
+        // Images are kept rather than rebuilt, so their bytes aren't rewritten
+        // on every save.
+        context.commitImages(images, replacing: assignment.images) { $0.assignment = assignment }
 
         // Cancel every pending notification, then rebuild the reminders from
         // the drafts the same way the checklist is rebuilt above.

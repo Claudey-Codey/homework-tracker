@@ -1,6 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
-import { db, type Assignment } from "../../db";
+import { db, deleteAssignment, type Assignment } from "../../db";
 import { dueSection, dueSections } from "../../support/due";
 import { ContentUnavailable } from "../../ui/ContentUnavailable";
 import { GlassButton } from "../../ui/GlassButton";
@@ -77,7 +77,7 @@ export function AssignmentsView() {
                       label: "Delete",
                       icon: <TrashIcon size={20} />,
                       color: "var(--red)",
-                      onAction: () => void db.assignments.delete(assignment.id),
+                      onAction: () => void deleteAssignment(assignment.id),
                     },
                   ]}
                 >

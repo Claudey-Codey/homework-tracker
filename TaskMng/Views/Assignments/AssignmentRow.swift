@@ -45,6 +45,12 @@ struct AssignmentRow: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
+
+                    if !assignment.images.isEmpty {
+                        Label("\(assignment.images.count)", systemImage: "photo")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
 

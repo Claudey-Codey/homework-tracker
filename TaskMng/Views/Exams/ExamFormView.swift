@@ -13,6 +13,7 @@ struct ExamFormView: View {
 
     @State private var title: String
     @State private var notes: [DraftNote]
+    @State private var images: [DraftImage]
     @State private var date: Date
     @State private var hasTime: Bool
     @State private var subject: Subject?
@@ -30,6 +31,7 @@ struct ExamFormView: View {
         } else {
             _notes = State(initialValue: existingNotes)
         }
+        _images = State(initialValue: (exam?.sortedImages ?? []).map { DraftImage($0) })
         _date = State(initialValue: exam?.date ?? Self.defaultExamDate())
         _hasTime = State(initialValue: exam?.hasTime ?? false)
         _subject = State(initialValue: exam?.subject)
@@ -77,7 +79,8 @@ struct ExamFormView: View {
                 NotesSection(
                     header: "Study material",
                     emptyFooter: "Add as many notes as you like — one per topic, chapter, or worksheet.",
-                    notes: $notes)
+                    notes: $notes,
+                    images: $images)
 
                 Section {
                     ReminderEditor(reminders: $reminders)
@@ -131,6 +134,10 @@ struct ExamFormView: View {
             context.insert(note)
         }
         exam.studyMaterial = ""
+
+        // Images are kept rather than rebuilt, so their bytes aren't rewritten
+        // on every save.
+        context.commitImages(images, replacing: exam.images) { $0.exam = exam }
 
         // Cancel every pending notification, then rebuild the reminders from
         // the drafts the same way the notes are rebuilt above.

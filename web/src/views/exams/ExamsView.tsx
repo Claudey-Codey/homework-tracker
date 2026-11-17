@@ -1,13 +1,13 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
-import { db, type Exam, type Subject } from "../../db";
+import { db, deleteExam, type Exam, type Subject } from "../../db";
 import { formatMonthDay, formatTime } from "../../support/dates";
 import { urgencyColor } from "../../support/due";
 import { noteTitle } from "../../support/noteText";
 import { noSubjectHex } from "../../support/theme";
 import { ContentUnavailable } from "../../ui/ContentUnavailable";
 import { GlassButton } from "../../ui/GlassButton";
-import { emptyIconProps, GraduationCapIcon, NoteIcon, PlusIcon, TrashIcon } from "../../ui/icons";
+import { emptyIconProps, GraduationCapIcon, NoteIcon, PhotoIcon, PlusIcon, TrashIcon } from "../../ui/icons";
 import { List, Section } from "../../ui/List";
 import { Screen } from "../../ui/NavStack";
 import { Sheet } from "../../ui/Sheet";
@@ -55,7 +55,7 @@ export function ExamsView() {
                     label: "Delete",
                     icon: <TrashIcon size={20} />,
                     color: "var(--red)",
-                    onAction: () => void db.exams.delete(exam.id),
+                    onAction: () => void deleteExam(exam.id),
                   },
                 ]}
               >
@@ -97,6 +97,13 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
             <span className="line-clamp-2" dir="auto">
               {exam.notes.map((note) => noteTitle(note.text)).join(" · ")}
             </span>
+          </span>
+        )}
+
+        {(exam.images?.length ?? 0) > 0 && (
+          <span className="caption secondary" style={{ display: "flex", gap: 4, alignItems: "center" }}>
+            <PhotoIcon size={13} strokeWidth={2.2} />
+            {exam.images!.length === 1 ? "1 image" : `${exam.images!.length} images`}
           </span>
         )}
       </div>

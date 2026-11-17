@@ -3,6 +3,7 @@ import { flushSync } from "react-dom";
 import { db, type Assignment, type ChecklistItem, type Reminder } from "../../db";
 import { defaultDueDate, endOfDay } from "../../support/dates";
 import { newId } from "../../support/id";
+import { commitImages, type DraftImage } from "../../support/images";
 import { CheckBox } from "../../ui/CheckBox";
 import { GlassButton } from "../../ui/GlassButton";
 import { PlusCircleFillIcon, TrashIcon } from "../../ui/icons";
@@ -35,6 +36,7 @@ export function AssignmentForm({ assignment }: { assignment?: Assignment }) {
   const [checklist, setChecklist] = useState<ChecklistItem[]>(assignment?.checklist ?? []);
   const [newStep, setNewStep] = useState("");
   const [notes, setNotes] = useState<DraftNote[]>(assignment?.notes ?? []);
+  const [images, setImages] = useState<DraftImage[]>(assignment?.images ?? []);
 
   /// Step inputs by id, so Return can move the cursor down the list.
   const stepInputs = useRef(new Map<string, HTMLInputElement>());
@@ -107,6 +109,7 @@ export function AssignmentForm({ assignment }: { assignment?: Assignment }) {
       .filter((item) => item.text !== "");
     const finalDate = hasTime ? dueDate : endOfDay(dueDate);
 
+    const savedImages = await commitImages(images, assignment?.images);
     await db.assignments.put({
       id: assignment?.id ?? newId(),
       title: trimmedTitle,
@@ -116,6 +119,7 @@ export function AssignmentForm({ assignment }: { assignment?: Assignment }) {
       subjectId: subjectId || null,
       checklist: steps,
       notes: finalizeNotes(notes, assignment?.notes),
+      images: savedImages,
       reminders,
       createdAt: assignment?.createdAt ?? Date.now(),
     });
@@ -166,6 +170,8 @@ export function AssignmentForm({ assignment }: { assignment?: Assignment }) {
             emptyFooter="Optional. Write down what the assignment asks for, or anything you need to remember."
             notes={notes}
             onChange={setNotes}
+            images={images}
+            onImagesChange={setImages}
           />
 
           <Section

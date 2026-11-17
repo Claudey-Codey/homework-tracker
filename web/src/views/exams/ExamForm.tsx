@@ -2,6 +2,7 @@ import { useState } from "react";
 import { db, type Exam, type Reminder } from "../../db";
 import { defaultExamDate, endOfDay } from "../../support/dates";
 import { newId } from "../../support/id";
+import { commitImages, type DraftImage } from "../../support/images";
 import { GlassButton } from "../../ui/GlassButton";
 import { List, Row, Section } from "../../ui/List";
 import { DateRow, MenuPickerRow, TimeRow } from "../../ui/Pickers";
@@ -18,6 +19,7 @@ export function ExamForm({ exam }: { exam?: Exam }) {
 
   const [title, setTitle] = useState(exam?.title ?? "");
   const [notes, setNotes] = useState<DraftNote[]>(exam?.notes ?? []);
+  const [images, setImages] = useState<DraftImage[]>(exam?.images ?? []);
   const [date, setDate] = useState(() => (exam ? new Date(exam.date) : defaultExamDate()));
   const [hasTime, setHasTime] = useState(exam?.hasTime ?? false);
   const [subjectId, setSubjectId] = useState(exam?.subjectId ?? "");
@@ -26,6 +28,7 @@ export function ExamForm({ exam }: { exam?: Exam }) {
   const canSave = subjectId !== "" || title.trim() !== "";
 
   const save = async () => {
+    const savedImages = await commitImages(images, exam?.images);
     await db.exams.put({
       id: exam?.id ?? newId(),
       title: title.trim(),
@@ -33,6 +36,7 @@ export function ExamForm({ exam }: { exam?: Exam }) {
       hasTime,
       subjectId: subjectId || null,
       notes: finalizeNotes(notes, exam?.notes),
+      images: savedImages,
       reminders,
       createdAt: exam?.createdAt ?? Date.now(),
     });
@@ -83,6 +87,8 @@ export function ExamForm({ exam }: { exam?: Exam }) {
             emptyFooter="Add as many notes as you like — one per topic, chapter, or worksheet."
             notes={notes}
             onChange={setNotes}
+            images={images}
+            onImagesChange={setImages}
           />
 
           <ReminderSection reminders={reminders} onChange={setReminders} />

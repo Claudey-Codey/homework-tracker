@@ -1,17 +1,23 @@
+import PhotosUI
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// A list of Markdown notes with Add and Import buttons — the exam's study
-/// material and an assignment's content. Tapping a note opens the editor.
-/// Notes are held as drafts by the owning form and only committed on Save.
+/// Markdown notes and attached images, with Add and Import buttons — the
+/// exam's study material and an assignment's content. Tapping a note opens the
+/// editor; tapping an image shows it full size. Everything is held as drafts
+/// by the owning form and only committed on Save.
 struct NotesSection: View {
     let header: String
-    /// Shown under the section while it has no notes yet.
+    /// Shown under the section while it has nothing in it yet.
     let emptyFooter: String
     @Binding var notes: [DraftNote]
+    @Binding var images: [DraftImage]
 
     @State private var editingNote: DraftNote?
     @State private var importingNote = false
+    @State private var viewingImage: DraftImage?
+    @State private var photoSelection: [PhotosPickerItem] = []
+    @State private var importingImages = false
     @State private var importError: String?
 
     var body: some View {
@@ -31,6 +37,19 @@ struct NotesSection: View {
                 }
             }
             .onDelete { notes.remove(atOffsets: $0) }
+
+            ForEach(images) { image in
+                Button { viewingImage = image } label: {
+                    HStack(spacing: 12) {
+                        ImageThumbnail(image: image.thumbnail)
+                        Text(image.name)
+                            .font(.body)
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                    }
+                }
+            }
+            .onDelete { images.remove(atOffsets: $0) }
 
             Button {
                 let note = DraftNote(text: "")
@@ -62,6 +81,25 @@ struct NotesSection: View {
                 Text(importError ?? "")
             }
 
+            PhotosPicker(selection: $photoSelection, matching: .images) {
+                Label("Add Photo", systemImage: "photo.on.rectangle")
+            }
+            .onChange(of: photoSelection) { _, items in addPhotos(items) }
+            .sheet(item: $viewingImage) { image in
+                ImageViewer(image: image)
+            }
+
+            Button {
+                importingImages = true
+            } label: {
+                Label("Add Image from Files…", systemImage: "photo.badge.plus")
+            }
+            .fileImporter(isPresented: $importingImages,
+                          allowedContentTypes: [.png, .image],
+                          allowsMultipleSelection: true) { result in
+                importImages(result)
+            }
+
             Button {
                 importingNote = true
             } label: {
@@ -70,7 +108,48 @@ struct NotesSection: View {
         } header: {
             Text(header)
         } footer: {
-            Text(notes.isEmpty ? emptyFooter : "Tap a note to edit it, swipe to delete.")
+            Text(notes.isEmpty && images.isEmpty
+                 ? emptyFooter
+                 : "Tap a note or image to open it, swipe to delete.")
+        }
+    }
+
+    /// Photos come out of the picker as they were taken (HEIC, JPEG or PNG)
+    /// and are kept that way.
+    private func addPhotos(_ items: [PhotosPickerItem]) {
+        guard !items.isEmpty else { return }
+        // Clear the selection so picking the same photo again still registers.
+        photoSelection = []
+        Task {
+            for item in items {
+                guard let data = try? await item.loadTransferable(type: Data.self) else { continue }
+                withAnimation { images.append(DraftImage(data: data, name: "Photo")) }
+            }
+        }
+    }
+
+    private func importImages(_ result: Result<[URL], Error>) {
+        do {
+            var unreadable = 0
+            for url in try result.get() {
+                let scoped = url.startAccessingSecurityScopedResource()
+                defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+
+                let data = try Data(contentsOf: url)
+                let image = DraftImage(data: data, name: url.lastPathComponent)
+                guard image.thumbnail != nil else {
+                    unreadable += 1
+                    continue
+                }
+                withAnimation { images.append(image) }
+            }
+            if unreadable > 0 {
+                importError = unreadable == 1
+                    ? "That file isn't an image this iPhone can open."
+                    : "\(unreadable) files aren't images this iPhone can open."
+            }
+        } catch {
+            importError = error.localizedDescription
         }
     }
 
@@ -106,5 +185,65 @@ struct NotesSection: View {
 
     private func discardEmptyNotes() {
         notes.removeAll { $0.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+    }
+}
+
+/// A rounded square preview for an image row.
+private struct ImageThumbnail: View {
+    let image: UIImage?
+
+    var body: some View {
+        Group {
+            if let image {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                Image(systemName: "photo")
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(width: 44, height: 44)
+        .background(Color(.tertiarySystemFill))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .padding(.vertical, 2)
+    }
+}
+
+/// An attached image, fitted to the screen, with a share button for saving it
+/// to Photos or sending it on.
+private struct ImageViewer: View {
+    let image: DraftImage
+    @Environment(\.dismiss) private var dismiss
+    @State private var uiImage: UIImage?
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if let uiImage {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFit()
+                        .padding()
+                } else {
+                    ProgressView()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .navigationTitle(image.name)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    if let uiImage {
+                        ShareLink(item: Image(uiImage: uiImage),
+                                  preview: SharePreview(image.name, image: Image(uiImage: uiImage)))
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+        .task { uiImage = UIImage(data: image.data) }
     }
 }

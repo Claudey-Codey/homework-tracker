@@ -16,6 +16,10 @@ final class Exam {
     @Relationship(deleteRule: .cascade, inverse: \StudyNote.exam)
     var notes: [StudyNote] = []
 
+    /// Attached pictures. Deleting the exam deletes them too.
+    @Relationship(deleteRule: .cascade, inverse: \ImageAttachment.exam)
+    var images: [ImageAttachment] = []
+
     /// Any number of lead times. Deleting the exam takes them with it.
     @Relationship(deleteRule: .cascade, inverse: \Reminder.exam)
     var reminders: [Reminder] = []
@@ -47,6 +51,10 @@ final class Exam {
 
     var sortedNotes: [StudyNote] {
         notes.sorted { $0.order < $1.order }
+    }
+
+    var sortedImages: [ImageAttachment] {
+        images.sorted { $0.order < $1.order }
     }
 
     init(title: String, date: Date, subject: Subject?) {

@@ -91,6 +91,13 @@ private struct ExamRow: View {
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                 }
+
+                if !exam.images.isEmpty {
+                    Label(exam.images.count == 1 ? "1 image" : "\(exam.images.count) images",
+                          systemImage: "photo")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             Spacer()

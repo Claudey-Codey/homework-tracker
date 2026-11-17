@@ -2,11 +2,13 @@ import { lazy, Suspense, useState, type Dispatch, type SetStateAction } from "re
 import type { StudyNote } from "../db";
 import { pickTextFile, readTextFile } from "../support/files";
 import { newId } from "../support/id";
+import { pickImageFiles, useImageURL, type DraftImage } from "../support/images";
 import { notePreview, noteTitle } from "../support/noteText";
 import { Alert } from "../ui/Alert";
-import { ComposeIcon, ImportIcon, TrashIcon } from "../ui/icons";
+import { GlassButton } from "../ui/GlassButton";
+import { ComposeIcon, ImportIcon, PhotoIcon, TrashIcon } from "../ui/icons";
 import { ButtonRow, Section } from "../ui/List";
-import { Sheet } from "../ui/Sheet";
+import { Sheet, SheetBody, SheetNav, useDismiss } from "../ui/Sheet";
 import { SwipeRow } from "../ui/SwipeRow";
 
 /// The editor pulls in a whole rich-text engine, so it's only downloaded the
@@ -43,22 +45,36 @@ export function finalizeNotes(drafts: DraftNote[], saved: StudyNote[] = []): Stu
     });
 }
 
-/// A list of Markdown notes with Add and Import buttons — the exam's study
-/// material and an assignment's content. Tapping a note opens the editor.
+/// Markdown notes and attached images, with Add and Import buttons — the
+/// exam's study material and an assignment's content. Tapping a note opens
+/// the editor; tapping an image shows it full size.
 export function NotesSection({
   header,
   emptyFooter,
   notes,
   onChange,
+  images,
+  onImagesChange,
 }: {
   header: string;
-  /// Shown under the section while it has no notes yet.
+  /// Shown under the section while it has nothing in it yet.
   emptyFooter: string;
   notes: DraftNote[];
   onChange: Dispatch<SetStateAction<DraftNote[]>>;
+  images: DraftImage[];
+  onImagesChange: Dispatch<SetStateAction<DraftImage[]>>;
 }) {
   const [editingNote, setEditingNote] = useState<string | null>(null);
+  const [viewingImage, setViewingImage] = useState<DraftImage | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+
+  const addImages = () =>
+    pickImageFiles((files) =>
+      onImagesChange((current) => [
+        ...current,
+        ...files.map((file) => ({ id: newId(), name: file.name, createdAt: Date.now(), blob: file })),
+      ]),
+    );
 
   const addNote = () => {
     const note: DraftNote = { id: newId(), text: "", createdAt: Date.now() };
@@ -97,7 +113,11 @@ export function NotesSection({
     <>
       <Section
         header={header}
-        footer={notes.length === 0 ? emptyFooter : "Tap a note to edit it, swipe to delete."}
+        footer={
+          notes.length === 0 && images.length === 0
+            ? emptyFooter
+            : "Tap a note or image to open it, swipe to delete."
+        }
       >
         {notes.map((note) => (
           <SwipeRow
@@ -120,9 +140,31 @@ export function NotesSection({
             </div>
           </SwipeRow>
         ))}
+        {images.map((image) => (
+          <SwipeRow
+            key={image.id}
+            onClick={() => setViewingImage(image)}
+            trailing={[
+              {
+                label: "Delete",
+                icon: <TrashIcon size={20} />,
+                color: "var(--red)",
+                onAction: () => onImagesChange((current) => current.filter((i) => i.id !== image.id)),
+              },
+            ]}
+          >
+            <ImageThumbnail image={image} />
+            <span className="line-clamp-1" dir="auto" style={{ minWidth: 0 }}>{image.name}</span>
+          </SwipeRow>
+        ))}
         <ButtonRow icon={<ComposeIcon size={20} />} label="Add Note" onClick={addNote} />
+        <ButtonRow icon={<PhotoIcon size={20} />} label="Add Image…" onClick={addImages} />
         <ButtonRow icon={<ImportIcon size={20} />} label="Import .md File…" onClick={importNote} />
       </Section>
+
+      <Sheet item={viewingImage} onClose={() => setViewingImage(null)} plain>
+        {(image) => <ImageViewer image={image} />}
+      </Sheet>
 
       <Sheet item={editingNote} onClose={closeEditor} plain>
         {(id) => (
@@ -138,6 +180,35 @@ export function NotesSection({
       </Sheet>
 
       <Alert title="Couldn't Import File" message={importError} onClose={() => setImportError(null)} />
+    </>
+  );
+}
+
+function ImageThumbnail({ image }: { image: DraftImage }) {
+  const url = useImageURL(image);
+  return (
+    <span className="image-thumbnail">
+      {url && <img src={url} alt="" />}
+    </span>
+  );
+}
+
+function ImageViewer({ image }: { image: DraftImage }) {
+  const dismiss = useDismiss();
+  const url = useImageURL(image);
+  return (
+    <>
+      <SheetNav
+        title={<span className="line-clamp-1" dir="auto">{image.name}</span>}
+        trailing={
+          <GlassButton prominent onClick={dismiss}>
+            Done
+          </GlassButton>
+        }
+      />
+      <SheetBody>
+        <div className="image-viewer">{url && <img src={url} alt={image.name} />}</div>
+      </SheetBody>
     </>
   );
 }

@@ -37,6 +37,18 @@ export interface StudyNote {
   updatedAt: number;
 }
 
+/// A picture attached to an assignment or exam. Only this description lives
+/// on the record; the bytes sit in `files` under `imageKey(id)`, so listing
+/// assignments and exams doesn't drag every image along with it.
+export interface ImageAttachment {
+  id: string;
+  /// The original filename, shown in the list.
+  name: string;
+  createdAt: number;
+}
+
+export const imageKey = (id: string) => `image:${id}`;
+
 export interface Assignment {
   id: string;
   title: string;
@@ -50,6 +62,8 @@ export interface Assignment {
   /// Free-form content notes. Missing on assignments saved before notes
   /// existed, so read it as `notes ?? []`.
   notes?: StudyNote[];
+  /// Attached pictures. Missing on records from before images existed.
+  images?: ImageAttachment[];
   reminders: Reminder[];
   createdAt: number;
 }
@@ -61,11 +75,14 @@ export interface Exam {
   hasTime: boolean;
   subjectId: string | null;
   notes: StudyNote[];
+  /// Attached pictures. Missing on records from before images existed.
+  images?: ImageAttachment[];
   reminders: Reminder[];
   createdAt: number;
 }
 
-/// Binary blobs that don't belong in localStorage — the profile photo.
+/// Binary blobs that don't belong in localStorage — the profile photo and
+/// attached images.
 export interface StoredFile {
   key: string;
   blob: Blob;
@@ -97,6 +114,23 @@ export async function deleteSubject(id: string) {
     await db.assignments.where("subjectId").equals(id).modify({ subjectId: null });
     await db.exams.where("subjectId").equals(id).modify({ subjectId: null });
     await db.subjects.delete(id);
+  });
+}
+
+/// Deleting an assignment or exam takes its image files with it.
+export async function deleteAssignment(id: string) {
+  await db.transaction("rw", db.assignments, db.files, async () => {
+    const assignment = await db.assignments.get(id);
+    await db.files.bulkDelete((assignment?.images ?? []).map((image) => imageKey(image.id)));
+    await db.assignments.delete(id);
+  });
+}
+
+export async function deleteExam(id: string) {
+  await db.transaction("rw", db.exams, db.files, async () => {
+    const exam = await db.exams.get(id);
+    await db.files.bulkDelete((exam?.images ?? []).map((image) => imageKey(image.id)));
+    await db.exams.delete(id);
   });
 }
 

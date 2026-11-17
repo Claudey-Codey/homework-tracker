@@ -8,6 +8,7 @@ struct TaskMngApp: App {
             RootTabView()
         }
         .modelContainer(for: [Subject.self, Assignment.self, Exam.self,
-                              ChecklistItem.self, StudyNote.self, Reminder.self])
+                              ChecklistItem.self, StudyNote.self, Reminder.self,
+                              ImageAttachment.self])
     }
 }
