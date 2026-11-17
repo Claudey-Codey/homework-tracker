@@ -9,7 +9,13 @@ const CACHE = `taskmng-${VERSION}`;
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting()),
+    caches
+      .open(CACHE)
+      // "reload" skips the browser's HTTP cache, which GitHub Pages lets hold
+      // pages for 10 minutes — otherwise a fresh install could store a stale
+      // copy of the page.
+      .then((cache) => cache.addAll(PRECACHE.map((url) => new Request(url, { cache: "reload" }))))
+      .then(() => self.skipWaiting()),
   );
 });
 
@@ -26,10 +32,13 @@ self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
 
-  // Pages: always try for the newest version, fall back to the cached one.
+  // Pages: always ask the server for the newest version (checking past the
+  // browser's own HTTP cache, which could otherwise serve a page up to 10
+  // minutes old), and fall back to the cached one when offline. A navigate
+  // request can't be given cache options, so it's re-fetched by URL.
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
+      fetch(request.url, { cache: "no-cache", credentials: "same-origin" })
         .then((response) => {
           const copy = response.clone();
           caches.open(CACHE).then((cache) => cache.put("./", copy));

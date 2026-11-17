@@ -77,6 +77,16 @@ export function SettingsView() {
           <ButtonRow icon={<ShareIcon size={20} />} label="Back Up Data…" onClick={() => void backUp()} />
           <ButtonRow icon={<ImportIcon size={20} />} label="Restore from Backup…" onClick={restore} />
         </Section>
+
+        <div className="caption secondary" style={{ textAlign: "center", padding: "0 16px 8px" }}>
+          Version {__BUILD_COMMIT__} ·{" "}
+          {new Date(__BUILD_TIME__).toLocaleString(undefined, {
+            day: "numeric",
+            month: "short",
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </div>
       </List>
 
       <Alert

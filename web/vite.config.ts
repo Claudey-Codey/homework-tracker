@@ -42,7 +42,16 @@ function serviceWorker(): Plugin {
 
 // `base: "./"` keeps every URL relative, so the build works wherever it's
 // hosted — the root of a domain or a sub-path like /taskmng/.
+/// Shown at the bottom of Settings so you can tell which build a phone is
+/// running. On GitHub the commit is known; locally it says "dev".
+const buildCommit = process.env.GITHUB_SHA?.slice(0, 7) ?? "dev";
+const buildTime = new Date().toISOString();
+
 export default defineConfig({
   base: "./",
   plugins: [react(), serviceWorker()],
+  define: {
+    __BUILD_COMMIT__: JSON.stringify(buildCommit),
+    __BUILD_TIME__: JSON.stringify(buildTime),
+  },
 });
