@@ -1,0 +1,19 @@
+// Publishes the web app to https://tuni.mamlukim.com/dondey/ as a Cloudflare
+// Worker that only serves static files. Deploy with `npm run deploy`.
+//
+// The build goes into dist-cloudflare/dondey/, so each file's path on disk
+// matches its URL under /dondey/. The route needs mamlukim.com to be on
+// Cloudflare and tuni.mamlukim.com to have a proxied (orange cloud) DNS record.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dondey",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist-cloudflare"
+  },
+  "routes": [
+    { "pattern": "tuni.mamlukim.com/dondey*", "zone_name": "mamlukim.com" }
+  ],
+  "workers_dev": false,
+  "preview_urls": false
+}

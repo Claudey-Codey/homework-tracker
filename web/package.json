@@ -7,7 +7,9 @@
     "dev": "vite --host",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:cloudflare": "npm run build -- --outDir dist-cloudflare/dondey --emptyOutDir",
+    "deploy": "npm run build:cloudflare && wrangler deploy"
   },
   "dependencies": {
     "@tiptap/extensions": "^3.33.1",
@@ -27,6 +29,7 @@
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.7.0",
     "typescript": "^5.9.3",
-    "vite": "^6.4.6"
+    "vite": "^6.4.6",
+    "wrangler": "^4.164.0"
   }
 }
