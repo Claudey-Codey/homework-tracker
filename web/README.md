@@ -32,9 +32,20 @@ npm run preview    # serves web/dist/ to try the real build (offline mode includ
 `npm run dev` also prints a **Network** URL. With your phone on the same Wi-Fi,
 open it in Safari to try changes on the phone right away.
 
-To publish, upload the contents of `web/dist/` to any static host (Cloudflare
-Pages, GitHub Pages, Netlify…). All paths are relative, so it works at the root
-of a domain or in a sub-folder.
+## Publishing
+
+The app is published to GitHub Pages by the
+[`Deploy web app`](../.github/workflows/deploy-web.yml) workflow:
+
+- Every push to `main` that changes something in `web/` builds and deploys it
+  automatically.
+- To redeploy by hand, go to **Actions ▸ Deploy web app ▸ Run workflow**.
+- The repository's **Settings ▸ Pages ▸ Source** must be set to
+  **GitHub Actions**, or the deploy step fails.
+
+You can still host it anywhere else: run `npm run build` and upload the
+contents of `web/dist/` to any static host (Cloudflare Pages, Netlify…). All
+paths are relative, so it works at the root of a domain or in a sub-folder.
 
 ## How it maps to the iOS app
 
