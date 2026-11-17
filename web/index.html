@@ -10,11 +10,16 @@
     <meta name="description" content="Assignments, homework and exams — a school planner." />
     <meta name="theme-color" content="#f2f2f7" />
 
-    <!-- Home Screen app on iOS: full screen, content under the status bar. -->
+    <!-- Home Screen app on iOS. The status bar is opaque ("default") rather
+         than drawn over the page ("black-translucent"): on iOS 26 the
+         translucent style leaves a strip at the bottom of the screen, as tall
+         as the status bar, that the page can never draw in. The bar takes its
+         colour from theme-color, which App.tsx keeps in step with light/dark.
+         iOS reads this once, when the app is added to the Home Screen. -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="TaskMng" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
     <link rel="icon" type="image/png" href="./icons/icon-192.png" />
     <link rel="manifest" href="./manifest.webmanifest" />

@@ -37,10 +37,18 @@ export function App() {
     root.style.setProperty("--on-accent", onAccentColor(accentHex));
     if (appearance === "system") delete root.dataset.theme;
     else root.dataset.theme = appearance;
-    // Keeps the status bar / browser chrome in step with the theme.
-    const dark = appearance === "dark" ||
-      (appearance === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", dark ? "#000000" : "#f2f2f7");
+
+    // Keeps the status bar / browser chrome in step with the theme. On the
+    // Home Screen the status bar is opaque and painted this colour, so it
+    // also has to follow the phone switching between light and dark.
+    const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+    const paintStatusBar = () => {
+      const dark = appearance === "dark" || (appearance === "system" && systemDark.matches);
+      document.querySelector('meta[name="theme-color"]')?.setAttribute("content", dark ? "#000000" : "#f2f2f7");
+    };
+    paintStatusBar();
+    systemDark.addEventListener("change", paintStatusBar);
+    return () => systemDark.removeEventListener("change", paintStatusBar);
   }, [accentHex, appearance]);
 
   useEffect(() => {

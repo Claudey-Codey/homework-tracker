@@ -17,6 +17,16 @@ the browser's IndexedDB. There is no server and no account.
 Always open it from the Home Screen icon. Safari can clear data for websites
 you haven't visited in a while, but Home Screen apps are protected from that.
 
+### Backups, and re-adding the app
+
+Your data lives inside the Home Screen app, so **removing the icon deletes
+it**. Before you remove it, go to **Account ▸ Settings ▸ Back Up Data…** and
+save the file to Files. After adding the app again, use **Restore from
+Backup…** in the same place.
+
+iOS reads some settings only when the app is added (such as the status bar
+style), so a change to those reaches your phone only after you re-add it.
+
 ## Work on it
 
 You need [Node.js](https://nodejs.org) 20 or newer.

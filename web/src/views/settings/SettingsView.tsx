@@ -1,8 +1,11 @@
+import { useState } from "react";
+import { pickBackupFile, restoreBackup, shareBackup } from "../../support/backup";
 import { checkOn } from "../../support/feedback";
 import { keys, useSetting } from "../../support/settings";
 import { accents, appearances, defaultAccentHex, type ThemeAppearance } from "../../support/theme";
-import { HalfCircleIcon, MoonIcon, SunIcon } from "../../ui/icons";
-import { List, Section } from "../../ui/List";
+import { Alert } from "../../ui/Alert";
+import { HalfCircleIcon, ImportIcon, MoonIcon, ShareIcon, SunIcon } from "../../ui/icons";
+import { ButtonRow, List, Section } from "../../ui/List";
 import { Screen } from "../../ui/NavStack";
 import { Swatches } from "../../ui/Swatches";
 import { ToggleRow } from "../../ui/Toggle";
@@ -12,6 +15,26 @@ export function SettingsView() {
   const [appearance, setAppearance] = useSetting<ThemeAppearance>(keys.appearance, "system");
   const [feedbackEnabled, setFeedbackEnabled] = useSetting(keys.feedbackEnabled, true);
   const [showTabLabels, setShowTabLabels] = useSetting(keys.showTabLabels, true);
+  const [backupMessage, setBackupMessage] = useState<{ title: string; message: string } | null>(null);
+
+  const backUp = () =>
+    shareBackup().catch(() =>
+      setBackupMessage({ title: "Couldn't Back Up", message: "Something went wrong making the backup. Try again." }),
+    );
+
+  const restore = () =>
+    pickBackupFile(async (file) => {
+      try {
+        const summary = await restoreBackup(file);
+        const count = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+        setBackupMessage({
+          title: "Backup Restored",
+          message: `Added ${count(summary.assignments, "assignment")}, ${count(summary.exams, "exam")} and ${count(summary.subjects, "subject")}.`,
+        });
+      } catch (error) {
+        setBackupMessage({ title: "Couldn't Restore", message: (error as Error).message });
+      }
+    });
 
   return (
     <Screen title="Settings" large>
@@ -46,7 +69,21 @@ export function SettingsView() {
             }}
           />
         </Section>
+
+        <Section
+          header="Backup"
+          footer="Everything lives on this iPhone, inside the Home Screen app. Removing the app from the Home Screen deletes it, so back up first. Restoring adds the backup's items back and leaves anything already here alone."
+        >
+          <ButtonRow icon={<ShareIcon size={20} />} label="Back Up Data…" onClick={() => void backUp()} />
+          <ButtonRow icon={<ImportIcon size={20} />} label="Restore from Backup…" onClick={restore} />
+        </Section>
       </List>
+
+      <Alert
+        title={backupMessage?.title ?? ""}
+        message={backupMessage?.message ?? null}
+        onClose={() => setBackupMessage(null)}
+      />
     </Screen>
   );
 }
