@@ -8,8 +8,8 @@ struct DraftChecklistItem: Identifiable, Equatable {
     var isDone: Bool
 }
 
-/// In-progress study note held by `ExamFormView` before it is committed to a
-/// `StudyNote` on save.
+/// In-progress note held by `ExamFormView` or `AssignmentFormView` before it
+/// is committed to a `StudyNote` on save.
 struct DraftNote: Identifiable, Equatable {
     let id = UUID()
     var text: String

@@ -28,7 +28,7 @@ export interface ChecklistItem {
   isDone: boolean;
 }
 
-/// A single study note. Like the Notes app, the first line doubles as the
+/// A single note — an exam's study material or an assignment's content. Like the Notes app, the first line doubles as the
 /// title and the rest is the preview. Stored as Markdown.
 export interface StudyNote {
   id: string;
@@ -47,6 +47,9 @@ export interface Assignment {
   isDone: boolean;
   subjectId: string | null;
   checklist: ChecklistItem[];
+  /// Free-form content notes. Missing on assignments saved before notes
+  /// existed, so read it as `notes ?? []`.
+  notes?: StudyNote[];
   reminders: Reminder[];
   createdAt: number;
 }

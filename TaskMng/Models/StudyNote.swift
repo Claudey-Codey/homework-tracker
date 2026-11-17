@@ -1,8 +1,9 @@
 import Foundation
 import SwiftData
 
-/// A single study note attached to an exam. Like the Notes app, the first
-/// line doubles as the note's title and the rest is the preview.
+/// A single note — an exam's study material or an assignment's content. Like
+/// the Notes app, the first line doubles as the note's title and the rest is
+/// the preview.
 @Model
 final class StudyNote {
     var text: String = ""
@@ -10,7 +11,9 @@ final class StudyNote {
     var order: Int = 0
     var createdAt: Date = Date()
     var updatedAt: Date = Date()
+    /// Exactly one of these is set: the note belongs to an exam or an assignment.
     var exam: Exam?
+    var assignment: Assignment?
 
     init(text: String, order: Int) {
         self.text = text
@@ -21,7 +24,7 @@ final class StudyNote {
 }
 
 /// Splitting a note's raw text into a title line and a preview line, shared by
-/// the saved model and the in-progress drafts held by the exam form.
+/// the saved model and the in-progress drafts held by the forms.
 enum NoteText {
     static func title(of text: String) -> String {
         let first = text

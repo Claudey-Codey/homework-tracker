@@ -15,6 +15,7 @@ struct AssignmentFormView: View {
     @State private var dueDate: Date
     @State private var hasTime: Bool
     @State private var subject: Subject?
+    @State private var notes: [DraftNote]
     @State private var reminders: [DraftReminder]
     /// Held as plain drafts rather than live `ChecklistItem`s so a brand-new
     /// assignment (not yet inserted) can have a list, and Cancel really cancels.
@@ -34,6 +35,7 @@ struct AssignmentFormView: View {
         _dueDate = State(initialValue: assignment?.dueDate ?? Self.defaultDueDate())
         _hasTime = State(initialValue: assignment?.hasTime ?? false)
         _subject = State(initialValue: assignment?.subject)
+        _notes = State(initialValue: (assignment?.sortedNotes ?? []).map { DraftNote(text: $0.text) })
         // Saved reminders win; an assignment from before multiple reminders
         // existed gets its single lead time folded in as the first one.
         let saved = (assignment?.sortedReminders ?? []).map {
@@ -73,6 +75,11 @@ struct AssignmentFormView: View {
                         }
                     }
                 }
+
+                NotesSection(
+                    header: "Content",
+                    emptyFooter: "Optional. Write down what the assignment asks for, or anything you need to remember.",
+                    notes: $notes)
 
                 Section {
                     ForEach($checklist) { $item in
@@ -236,6 +243,17 @@ struct AssignmentFormView: View {
             let item = ChecklistItem(text: text, isDone: draft.isDone, order: index)
             item.assignment = assignment
             context.insert(item)
+        }
+
+        // Notes are rebuilt from their drafts the same way.
+        for old in assignment.notes { context.delete(old) }
+        assignment.notes = []
+        for (index, draft) in notes.enumerated() {
+            let text = draft.text.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !text.isEmpty else { continue }
+            let note = StudyNote(text: text, order: index)
+            note.assignment = assignment
+            context.insert(note)
         }
 
         // Cancel every pending notification, then rebuild the reminders from

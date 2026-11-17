@@ -11,6 +11,7 @@ import { DateRow, MenuPickerRow, TimeRow } from "../../ui/Pickers";
 import { SheetBody, SheetNav, useDismiss } from "../../ui/Sheet";
 import { SwipeRow } from "../../ui/SwipeRow";
 import { ToggleRow } from "../../ui/Toggle";
+import { finalizeNotes, NotesSection, type DraftNote } from "../NotesSection";
 import { ReminderSection } from "../ReminderEditor";
 import { subjectOptions, useSubjects } from "../useSubjects";
 
@@ -33,6 +34,7 @@ export function AssignmentForm({ assignment }: { assignment?: Assignment }) {
   const [reminders, setReminders] = useState<Reminder[]>(assignment?.reminders ?? []);
   const [checklist, setChecklist] = useState<ChecklistItem[]>(assignment?.checklist ?? []);
   const [newStep, setNewStep] = useState("");
+  const [notes, setNotes] = useState<DraftNote[]>(assignment?.notes ?? []);
 
   /// Step inputs by id, so Return can move the cursor down the list.
   const stepInputs = useRef(new Map<string, HTMLInputElement>());
@@ -113,6 +115,7 @@ export function AssignmentForm({ assignment }: { assignment?: Assignment }) {
       isDone: assignment?.isDone ?? false,
       subjectId: subjectId || null,
       checklist: steps,
+      notes: finalizeNotes(notes, assignment?.notes),
       reminders,
       createdAt: assignment?.createdAt ?? Date.now(),
     });
@@ -157,6 +160,13 @@ export function AssignmentForm({ assignment }: { assignment?: Assignment }) {
               <Row className="disabled">No subjects yet. Add them in the Subjects tab.</Row>
             )}
           </Section>
+
+          <NotesSection
+            header="Content"
+            emptyFooter="Optional. Write down what the assignment asks for, or anything you need to remember."
+            notes={notes}
+            onChange={setNotes}
+          />
 
           <Section
             header="To-do list"

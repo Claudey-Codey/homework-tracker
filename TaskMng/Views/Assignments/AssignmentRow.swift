@@ -39,6 +39,12 @@ struct AssignmentRow: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
+
+                    if !assignment.notes.isEmpty {
+                        Label("\(assignment.notes.count)", systemImage: "note.text")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
 

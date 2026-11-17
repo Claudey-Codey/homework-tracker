@@ -14,6 +14,10 @@ final class Assignment {
     @Relationship(deleteRule: .cascade, inverse: \ChecklistItem.assignment)
     var checklist: [ChecklistItem] = []
 
+    /// Free-form content notes. Deleting the assignment deletes them too.
+    @Relationship(deleteRule: .cascade, inverse: \StudyNote.assignment)
+    var notes: [StudyNote] = []
+
     /// Any number of lead times. Deleting the assignment takes them with it.
     @Relationship(deleteRule: .cascade, inverse: \Reminder.assignment)
     var reminders: [Reminder] = []
@@ -45,6 +49,10 @@ final class Assignment {
 
     var sortedChecklist: [ChecklistItem] {
         checklist.sorted { $0.order < $1.order }
+    }
+
+    var sortedNotes: [StudyNote] {
+        notes.sorted { $0.order < $1.order }
     }
 
     var checklistDoneCount: Int {
