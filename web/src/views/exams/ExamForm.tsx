@@ -14,6 +14,7 @@ import { SwipeRow } from "../../ui/SwipeRow";
 import { ToggleRow } from "../../ui/Toggle";
 import { ReminderSection } from "../ReminderEditor";
 import { subjectOptions, useSubjects } from "../useSubjects";
+import { TextField } from "../../ui/TextField";
 
 /// The editor pulls in a whole rich-text engine, so it's only downloaded the
 /// first time a note is opened.
@@ -123,11 +124,9 @@ export function ExamForm({ exam }: { exam?: Exam }) {
         <List>
           <Section header="Exam">
             <Row>
-              <input
-                className="field"
+              <TextField
                 placeholder="Title (optional)"
                 value={title}
-                dir="auto"
                 onChange={(event) => setTitle(event.target.value)}
                 enterKeyHint="done"
               />
