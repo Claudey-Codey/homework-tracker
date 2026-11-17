@@ -11,6 +11,7 @@ import { ToggleRow } from "../../ui/Toggle";
 import { finalizeNotes, NotesSection, type DraftNote } from "../NotesSection";
 import { ReminderSection } from "../ReminderEditor";
 import { subjectOptions, useSubjects } from "../useSubjects";
+import { TextField } from "../../ui/TextField";
 
 /// Add or edit an exam. Presented as a sheet.
 export function ExamForm({ exam }: { exam?: Exam }) {
@@ -58,11 +59,9 @@ export function ExamForm({ exam }: { exam?: Exam }) {
         <List>
           <Section header="Exam">
             <Row>
-              <input
-                className="field"
+              <TextField
                 placeholder="Title (optional)"
                 value={title}
-                dir="auto"
                 onChange={(event) => setTitle(event.target.value)}
                 enterKeyHint="done"
               />

@@ -12,6 +12,7 @@ import { Swatches } from "../../ui/Swatches";
 import { SwipeRow } from "../../ui/SwipeRow";
 import { Toggle, ToggleRow } from "../../ui/Toggle";
 import { useSubjects } from "../useSubjects";
+import { TextField } from "../../ui/TextField";
 
 export function SubjectsView() {
   const subjects = useSubjects();
@@ -197,11 +198,9 @@ function SubjectForm({ subject }: { subject?: Subject }) {
         <List>
           <Section header="Name">
             <Row>
-              <input
-                className="field"
+              <TextField
                 placeholder="e.g. Mathematics"
                 value={name}
-                dir="auto"
                 onChange={(event) => setName(event.target.value)}
                 enterKeyHint="done"
               />

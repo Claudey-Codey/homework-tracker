@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Markdown } from "tiptap-markdown";
 import { exportMarkdown, pickTextFile, readTextFile } from "../../support/files";
 import { noteTitle, safeFilename } from "../../support/noteText";
+import { bottomGap } from "../../support/viewport";
 import { Alert } from "../../ui/Alert";
 import { GlassButton } from "../../ui/GlassButton";
 import {
@@ -58,7 +59,10 @@ function useKeyboardGap(): number {
     const viewport = window.visualViewport;
     if (!viewport) return;
     const update = () => {
-      setGap(Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop));
+      const keyboard = window.innerHeight - viewport.height - viewport.offsetTop;
+      // The sheet reaches `bottomGap` below the viewport (see viewport.ts),
+      // so the bar has that much further to climb.
+      setGap(keyboard > 0 ? keyboard + bottomGap() : 0);
     };
     viewport.addEventListener("resize", update);
     viewport.addEventListener("scroll", update);
