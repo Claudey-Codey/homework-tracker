@@ -1,9 +1,9 @@
-import { db, type Assignment, type Subject } from "../../db";
+import { db, isPdf, type Assignment, type Subject } from "../../db";
 import { formatMonthDay, formatTime } from "../../support/dates";
 import { urgencyColor } from "../../support/due";
 import { noSubjectHex, withAlpha } from "../../support/theme";
 import { CheckBox } from "../../ui/CheckBox";
-import { ChecklistIcon, NoteIcon, PhotoIcon } from "../../ui/icons";
+import { ChecklistIcon, NoteIcon, PdfIcon, PhotoIcon } from "../../ui/icons";
 
 export function AssignmentRow({
   assignment,
@@ -15,7 +15,8 @@ export function AssignmentRow({
   const accent = subject?.colorHex ?? noSubjectHex;
   const doneSteps = assignment.checklist.filter((item) => item.isDone).length;
   const noteCount = assignment.notes?.length ?? 0;
-  const imageCount = assignment.images?.length ?? 0;
+  const pdfCount = assignment.images?.filter(isPdf).length ?? 0;
+  const imageCount = (assignment.images?.length ?? 0) - pdfCount;
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "10px 0" }}>
@@ -44,7 +45,7 @@ export function AssignmentRow({
           {assignment.title}
         </span>
 
-        {(subject || assignment.checklist.length > 0 || noteCount > 0 || imageCount > 0) && (
+        {(subject || assignment.checklist.length > 0 || noteCount > 0 || imageCount > 0 || pdfCount > 0) && (
           <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
             {subject && (
               <span
@@ -76,6 +77,12 @@ export function AssignmentRow({
               <span className="caption secondary" style={{ display: "flex", alignItems: "center", gap: 4 }}>
                 <PhotoIcon size={13} strokeWidth={2.2} />
                 {imageCount}
+              </span>
+            )}
+            {pdfCount > 0 && (
+              <span className="caption secondary" style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <PdfIcon size={13} strokeWidth={2.2} />
+                {pdfCount}
               </span>
             )}
           </span>

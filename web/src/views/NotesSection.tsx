@@ -1,12 +1,12 @@
 import { lazy, Suspense, useState, type Dispatch, type SetStateAction } from "react";
-import type { StudyNote } from "../db";
+import { isPdf, type StudyNote } from "../db";
 import { pickTextFile, readTextFile } from "../support/files";
 import { newId } from "../support/id";
-import { pickImageFiles, useImageURL, type DraftImage } from "../support/images";
+import { draftFromFile, pickImageFiles, pickPdfFiles, useImageURL, type DraftImage } from "../support/images";
 import { notePreview, noteTitle } from "../support/noteText";
 import { Alert } from "../ui/Alert";
 import { GlassButton } from "../ui/GlassButton";
-import { ComposeIcon, ImportIcon, PhotoIcon, TrashIcon } from "../ui/icons";
+import { ComposeIcon, ImportIcon, PdfIcon, PhotoIcon, ShareIcon, TrashIcon } from "../ui/icons";
 import { ButtonRow, Section } from "../ui/List";
 import { Sheet, SheetBody, SheetNav, useDismiss } from "../ui/Sheet";
 import { SwipeRow } from "../ui/SwipeRow";
@@ -45,9 +45,9 @@ export function finalizeNotes(drafts: DraftNote[], saved: StudyNote[] = []): Stu
     });
 }
 
-/// Markdown notes and attached images, with Add and Import buttons — the
-/// exam's study material and an assignment's content. Tapping a note opens
-/// the editor; tapping an image shows it full size.
+/// Markdown notes and attached images and PDFs, with Add and Import buttons —
+/// the exam's study material and an assignment's content. Tapping a note
+/// opens the editor; tapping an image or PDF shows it full size.
 export function NotesSection({
   header,
   emptyFooter,
@@ -70,10 +70,12 @@ export function NotesSection({
 
   const addImages = () =>
     pickImageFiles((files) =>
-      onImagesChange((current) => [
-        ...current,
-        ...files.map((file) => ({ id: newId(), name: file.name, createdAt: Date.now(), blob: file })),
-      ]),
+      onImagesChange((current) => [...current, ...files.map((file) => draftFromFile(file, "image"))]),
+    );
+
+  const addPdfs = () =>
+    pickPdfFiles((files) =>
+      onImagesChange((current) => [...current, ...files.map((file) => draftFromFile(file, "pdf"))]),
     );
 
   const addNote = () => {
@@ -116,7 +118,7 @@ export function NotesSection({
         footer={
           notes.length === 0 && images.length === 0
             ? emptyFooter
-            : "Tap a note or image to open it, swipe to delete."
+            : "Tap a note, image or PDF to open it, swipe to delete."
         }
       >
         {notes.map((note) => (
@@ -153,17 +155,18 @@ export function NotesSection({
               },
             ]}
           >
-            <ImageThumbnail image={image} />
+            {isPdf(image) ? <PdfThumbnail /> : <ImageThumbnail image={image} />}
             <span className="line-clamp-1" dir="auto" style={{ minWidth: 0 }}>{image.name}</span>
           </SwipeRow>
         ))}
         <ButtonRow icon={<ComposeIcon size={20} />} label="Add Note" onClick={addNote} />
         <ButtonRow icon={<PhotoIcon size={20} />} label="Add Image…" onClick={addImages} />
+        <ButtonRow icon={<PdfIcon size={20} />} label="Add PDF…" onClick={addPdfs} />
         <ButtonRow icon={<ImportIcon size={20} />} label="Import .md File…" onClick={importNote} />
       </Section>
 
       <Sheet item={viewingImage} onClose={() => setViewingImage(null)} plain>
-        {(image) => <ImageViewer image={image} />}
+        {(image) => (isPdf(image) ? <PdfViewer pdf={image} /> : <ImageViewer image={image} />)}
       </Sheet>
 
       <Sheet item={editingNote} onClose={closeEditor} plain>
@@ -208,6 +211,58 @@ function ImageViewer({ image }: { image: DraftImage }) {
       />
       <SheetBody>
         <div className="image-viewer">{url && <img src={url} alt={image.name} />}</div>
+      </SheetBody>
+    </>
+  );
+}
+
+function PdfThumbnail() {
+  return (
+    <span className="image-thumbnail pdf-thumbnail">
+      <PdfIcon size={22} />
+    </span>
+  );
+}
+
+/// Hands the PDF to the share sheet where there is one, so on iPhone it can be
+/// opened in Books or saved to Files; elsewhere it opens in a new tab.
+async function sharePdf(pdf: DraftImage, url: string) {
+  const blob: Blob = pdf.blob ? pdf.blob : await (await fetch(url)).blob();
+  const file = new File([blob], pdf.name, { type: "application/pdf" });
+  if (navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file] });
+      return;
+    } catch (error) {
+      if ((error as DOMException).name === "AbortError") return;
+    }
+  }
+  window.open(url, "_blank", "noopener");
+}
+
+/// The browser's own PDF viewer, filling the sheet.
+function PdfViewer({ pdf }: { pdf: DraftImage }) {
+  const dismiss = useDismiss();
+  const url = useImageURL(pdf);
+  return (
+    <>
+      <SheetNav
+        title={<span className="line-clamp-1" dir="auto">{pdf.name}</span>}
+        leading={
+          url && (
+            <GlassButton onClick={() => void sharePdf(pdf, url)} label="Share">
+              <ShareIcon size={20} />
+            </GlassButton>
+          )
+        }
+        trailing={
+          <GlassButton prominent onClick={dismiss}>
+            Done
+          </GlassButton>
+        }
+      />
+      <SheetBody>
+        <div className="pdf-viewer">{url && <iframe src={url} title={pdf.name} />}</div>
       </SheetBody>
     </>
   );

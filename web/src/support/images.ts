@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import { newId } from "./id";
 import { db, imageKey, type ImageAttachment } from "../db";
 
-/// An image in a form, held until Save. `blob` is set for images picked since
+const pdfType = "application/pdf";
+
+/// An image or PDF in a form, held until Save. `blob` is set for images picked since
 /// the form opened; ones already saved are read back from `files` on demand.
 export interface DraftImage extends ImageAttachment {
   blob?: Blob;
@@ -21,6 +24,30 @@ export function pickImageFiles(onPick: (files: File[]) => void) {
   input.click();
 }
 
+/// Opens the system picker for PDFs — Files on iPhone. Some browsers leave
+/// `type` empty, so the extension counts too.
+export function pickPdfFiles(onPick: (files: File[]) => void) {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".pdf,application/pdf";
+  input.multiple = true;
+  input.onchange = () => {
+    const files = Array.from(input.files ?? []).filter(
+      (file) => file.type === pdfType || file.name.toLowerCase().endsWith(".pdf"),
+    );
+    if (files.length > 0) onPick(files);
+  };
+  input.click();
+}
+
+/// A draft for a file just picked. PDFs are stored with their type set even
+/// when the browser didn't report one, so they open as PDFs later.
+export function draftFromFile(file: File, kind: "image" | "pdf"): DraftImage {
+  const type = kind === "pdf" ? pdfType : file.type;
+  const blob = kind === "pdf" && file.type !== pdfType ? new Blob([file], { type: pdfType }) : file;
+  return { id: newId(), name: file.name, createdAt: Date.now(), type, blob };
+}
+
 /// Writes newly picked images to `files` and deletes the ones that were
 /// removed. Returns the descriptions to store on the record. The bytes go in
 /// as-is, so a PNG stays a PNG.
@@ -33,7 +60,7 @@ export async function commitImages(
     drafts.flatMap((image) => (image.blob ? [{ key: imageKey(image.id), blob: image.blob }] : [])),
   );
   await db.files.bulkDelete(saved.filter((image) => !keep.has(image.id)).map((image) => imageKey(image.id)));
-  return drafts.map(({ id, name, createdAt }) => ({ id, name, createdAt }));
+  return drafts.map(({ id, name, createdAt, type }) => (type ? { id, name, createdAt, type } : { id, name, createdAt }));
 }
 
 /// An object URL for an image, whether it's still a draft or already saved.

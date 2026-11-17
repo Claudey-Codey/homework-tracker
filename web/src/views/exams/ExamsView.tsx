@@ -1,13 +1,13 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
-import { db, deleteExam, type Exam, type Subject } from "../../db";
+import { db, deleteExam, isPdf, type Exam, type Subject } from "../../db";
 import { formatMonthDay, formatTime } from "../../support/dates";
 import { urgencyColor } from "../../support/due";
 import { noteTitle } from "../../support/noteText";
 import { noSubjectHex } from "../../support/theme";
 import { ContentUnavailable } from "../../ui/ContentUnavailable";
 import { GlassButton } from "../../ui/GlassButton";
-import { emptyIconProps, GraduationCapIcon, NoteIcon, PhotoIcon, PlusIcon, TrashIcon } from "../../ui/icons";
+import { emptyIconProps, GraduationCapIcon, NoteIcon, PdfIcon, PhotoIcon, PlusIcon, TrashIcon } from "../../ui/icons";
 import { List, Section } from "../../ui/List";
 import { Screen } from "../../ui/NavStack";
 import { Sheet } from "../../ui/Sheet";
@@ -79,6 +79,8 @@ export function ExamsView() {
 function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
   const accent = subject?.colorHex ?? noSubjectHex;
   const displayTitle = exam.title || subject?.name || "Exam";
+  const pdfCount = exam.images?.filter(isPdf).length ?? 0;
+  const imageCount = (exam.images?.length ?? 0) - pdfCount;
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "10px 0" }}>
@@ -100,10 +102,17 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
           </span>
         )}
 
-        {(exam.images?.length ?? 0) > 0 && (
+        {imageCount > 0 && (
           <span className="caption secondary" style={{ display: "flex", gap: 4, alignItems: "center" }}>
             <PhotoIcon size={13} strokeWidth={2.2} />
-            {exam.images!.length === 1 ? "1 image" : `${exam.images!.length} images`}
+            {imageCount === 1 ? "1 image" : `${imageCount} images`}
+          </span>
+        )}
+
+        {pdfCount > 0 && (
+          <span className="caption secondary" style={{ display: "flex", gap: 4, alignItems: "center" }}>
+            <PdfIcon size={13} strokeWidth={2.2} />
+            {pdfCount === 1 ? "1 PDF" : `${pdfCount} PDFs`}
           </span>
         )}
       </div>

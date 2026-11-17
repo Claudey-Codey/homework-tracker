@@ -10,6 +10,7 @@ A native SwiftUI + SwiftData iOS app to track assignments, homework, and exams.
 - **Assignments** dashboard — all homework + projects, grouped Overdue / This Week / Later, sortable, searchable.
 - **Homework** dashboard — homework only.
 - **Exams** dashboard — each exam has a date, subject, and study-material notes.
+- **Attachments** — add images and PDFs to an assignment's content or an exam's study material; tap one to view it, share it to open in Books or save to Files.
 - **Subjects** — add the subjects you're taking, give each a color, toggle them on/off.
 - **+ to add** everywhere, with due date, type (homework/project), and subject pickers.
 - **Reminders** — optional local notifications before a due date or exam.

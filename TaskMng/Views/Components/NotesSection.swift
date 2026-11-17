@@ -1,10 +1,11 @@
+import PDFKit
 import PhotosUI
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Markdown notes and attached images, with Add and Import buttons — the
-/// exam's study material and an assignment's content. Tapping a note opens the
-/// editor; tapping an image shows it full size. Everything is held as drafts
+/// Markdown notes and attached images and PDFs, with Add and Import buttons —
+/// the exam's study material and an assignment's content. Tapping a note opens
+/// the editor; tapping an image or PDF shows it full size. Everything is held as drafts
 /// by the owning form and only committed on Save.
 struct NotesSection: View {
     let header: String
@@ -18,6 +19,7 @@ struct NotesSection: View {
     @State private var viewingImage: DraftImage?
     @State private var photoSelection: [PhotosPickerItem] = []
     @State private var importingImages = false
+    @State private var importingPDFs = false
     @State private var importError: String?
 
     var body: some View {
@@ -41,7 +43,7 @@ struct NotesSection: View {
             ForEach(images) { image in
                 Button { viewingImage = image } label: {
                     HStack(spacing: 12) {
-                        ImageThumbnail(image: image.thumbnail)
+                        ImageThumbnail(image: image.thumbnail, isPDF: image.isPDF)
                         Text(image.name)
                             .font(.body)
                             .foregroundStyle(.primary)
@@ -86,7 +88,11 @@ struct NotesSection: View {
             }
             .onChange(of: photoSelection) { _, items in addPhotos(items) }
             .sheet(item: $viewingImage) { image in
-                ImageViewer(image: image)
+                if image.isPDF {
+                    PDFViewer(pdf: image)
+                } else {
+                    ImageViewer(image: image)
+                }
             }
 
             Button {
@@ -101,6 +107,17 @@ struct NotesSection: View {
             }
 
             Button {
+                importingPDFs = true
+            } label: {
+                Label("Add PDF…", systemImage: "doc.richtext")
+            }
+            .fileImporter(isPresented: $importingPDFs,
+                          allowedContentTypes: [.pdf],
+                          allowsMultipleSelection: true) { result in
+                importPDFs(result)
+            }
+
+            Button {
                 importingNote = true
             } label: {
                 Label("Import .md File…", systemImage: "square.and.arrow.down")
@@ -110,7 +127,7 @@ struct NotesSection: View {
         } footer: {
             Text(notes.isEmpty && images.isEmpty
                  ? emptyFooter
-                 : "Tap a note or image to open it, swipe to delete.")
+                 : "Tap a note, image or PDF to open it, swipe to delete.")
         }
     }
 
@@ -153,6 +170,31 @@ struct NotesSection: View {
         }
     }
 
+    private func importPDFs(_ result: Result<[URL], Error>) {
+        do {
+            var unreadable = 0
+            for url in try result.get() {
+                let scoped = url.startAccessingSecurityScopedResource()
+                defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+
+                let data = try Data(contentsOf: url)
+                guard PDFDocument(data: data) != nil else {
+                    unreadable += 1
+                    continue
+                }
+                let pdf = DraftImage(data: data, name: url.lastPathComponent, isPDF: true)
+                withAnimation { images.append(pdf) }
+            }
+            if unreadable > 0 {
+                importError = unreadable == 1
+                    ? "That file isn't a PDF this iPhone can open."
+                    : "\(unreadable) files aren't PDFs this iPhone can open."
+            }
+        } catch {
+            importError = error.localizedDescription
+        }
+    }
+
     private func importNote(_ result: Result<URL, Error>) {
         do {
             let url = try result.get()
@@ -188,9 +230,10 @@ struct NotesSection: View {
     }
 }
 
-/// A rounded square preview for an image row.
+/// A rounded square preview for an image or PDF row.
 private struct ImageThumbnail: View {
     let image: UIImage?
+    var isPDF = false
 
     var body: some View {
         Group {
@@ -199,7 +242,7 @@ private struct ImageThumbnail: View {
                     .resizable()
                     .scaledToFill()
             } else {
-                Image(systemName: "photo")
+                Image(systemName: isPDF ? "doc.richtext" : "photo")
                     .foregroundStyle(.secondary)
             }
         }
@@ -246,4 +289,61 @@ private struct ImageViewer: View {
         }
         .task { uiImage = UIImage(data: image.data) }
     }
+}
+
+/// An attached PDF, scrollable and zoomable, with a share button for opening
+/// it in Books, saving it to Files or sending it on.
+private struct PDFViewer: View {
+    let pdf: DraftImage
+    @Environment(\.dismiss) private var dismiss
+    /// A temporary copy under the original filename, so the share sheet
+    /// hands on a named PDF rather than anonymous data.
+    @State private var fileURL: URL?
+
+    var body: some View {
+        NavigationStack {
+            PDFKitView(data: pdf.data)
+                .ignoresSafeArea(edges: .bottom)
+                .navigationTitle(pdf.name)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        if let fileURL {
+                            ShareLink(item: fileURL)
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") { dismiss() }
+                    }
+                }
+        }
+        .task {
+            let folder = FileManager.default.temporaryDirectory
+                .appendingPathComponent(UUID().uuidString, isDirectory: true)
+            let name = pdf.name.lowercased().hasSuffix(".pdf") ? pdf.name : "\(pdf.name).pdf"
+            let url = folder.appendingPathComponent(name)
+            do {
+                try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+                try pdf.data.write(to: url)
+                fileURL = url
+            } catch {
+                fileURL = nil
+            }
+        }
+    }
+}
+
+/// PDFKit's viewer, which SwiftUI has no native equivalent of.
+private struct PDFKitView: UIViewRepresentable {
+    let data: Data
+
+    func makeUIView(context: Context) -> PDFView {
+        let view = PDFView()
+        view.autoScales = true
+        view.displayMode = .singlePageContinuous
+        view.document = PDFDocument(data: data)
+        return view
+    }
+
+    func updateUIView(_ view: PDFView, context: Context) {}
 }

@@ -1443,3 +1443,25 @@ button.cell {
   height: auto;
   border-radius: 10px;
 }
+
+/* Attached PDFs: a document icon in the list, the browser's viewer in the sheet. */
+.pdf-thumbnail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--red);
+}
+
+.pdf-viewer {
+  display: flex;
+  padding: 16px;
+  height: calc(100dvh - 140px);
+}
+
+.pdf-viewer iframe {
+  flex: 1;
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  background: #fff;
+}

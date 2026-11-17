@@ -37,15 +37,20 @@ export interface StudyNote {
   updatedAt: number;
 }
 
-/// A picture attached to an assignment or exam. Only this description lives
-/// on the record; the bytes sit in `files` under `imageKey(id)`, so listing
-/// assignments and exams doesn't drag every image along with it.
+/// A picture or PDF attached to an assignment or exam. Only this description
+/// lives on the record; the bytes sit in `files` under `imageKey(id)`, so
+/// listing assignments and exams doesn't drag every file along with it.
 export interface ImageAttachment {
   id: string;
   /// The original filename, shown in the list.
   name: string;
   createdAt: number;
+  /// The MIME type. Missing on images saved before PDFs could be attached,
+  /// so anything without one is an image.
+  type?: string;
 }
+
+export const isPdf = (attachment: ImageAttachment) => attachment.type === "application/pdf";
 
 export const imageKey = (id: string) => `image:${id}`;
 
@@ -62,7 +67,7 @@ export interface Assignment {
   /// Free-form content notes. Missing on assignments saved before notes
   /// existed, so read it as `notes ?? []`.
   notes?: StudyNote[];
-  /// Attached pictures. Missing on records from before images existed.
+  /// Attached pictures and PDFs. Missing on records from before images existed.
   images?: ImageAttachment[];
   reminders: Reminder[];
   createdAt: number;
@@ -75,14 +80,14 @@ export interface Exam {
   hasTime: boolean;
   subjectId: string | null;
   notes: StudyNote[];
-  /// Attached pictures. Missing on records from before images existed.
+  /// Attached pictures and PDFs. Missing on records from before images existed.
   images?: ImageAttachment[];
   reminders: Reminder[];
   createdAt: number;
 }
 
 /// Binary blobs that don't belong in localStorage — the profile photo and
-/// attached images.
+/// attached images and PDFs.
 export interface StoredFile {
   key: string;
   blob: Blob;
@@ -117,7 +122,7 @@ export async function deleteSubject(id: string) {
   });
 }
 
-/// Deleting an assignment or exam takes its image files with it.
+/// Deleting an assignment or exam takes its image and PDF files with it.
 export async function deleteAssignment(id: string) {
   await db.transaction("rw", db.assignments, db.files, async () => {
     const assignment = await db.assignments.get(id);

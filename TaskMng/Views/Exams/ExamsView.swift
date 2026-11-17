@@ -92,9 +92,18 @@ private struct ExamRow: View {
                         .lineLimit(2)
                 }
 
-                if !exam.images.isEmpty {
-                    Label(exam.images.count == 1 ? "1 image" : "\(exam.images.count) images",
+                let pdfCount = exam.images.filter(\.isPDF).count
+                let imageCount = exam.images.count - pdfCount
+                if imageCount > 0 {
+                    Label(imageCount == 1 ? "1 image" : "\(imageCount) images",
                           systemImage: "photo")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                if pdfCount > 0 {
+                    Label(pdfCount == 1 ? "1 PDF" : "\(pdfCount) PDFs",
+                          systemImage: "doc.richtext")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

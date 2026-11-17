@@ -46,8 +46,16 @@ struct AssignmentRow: View {
                             .foregroundStyle(.secondary)
                     }
 
-                    if !assignment.images.isEmpty {
-                        Label("\(assignment.images.count)", systemImage: "photo")
+                    let pdfCount = assignment.images.filter(\.isPDF).count
+                    let imageCount = assignment.images.count - pdfCount
+                    if imageCount > 0 {
+                        Label("\(imageCount)", systemImage: "photo")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if pdfCount > 0 {
+                        Label("\(pdfCount)", systemImage: "doc.richtext")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

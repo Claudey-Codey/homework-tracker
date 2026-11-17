@@ -29,6 +29,7 @@ export {
   Lock as LockIcon,
   Moon as MoonIcon,
   NotebookText as NoteIcon,
+  FileText as PdfIcon,
   Plus as PlusIcon,
   Search as SearchIcon,
   Settings as GearIcon,

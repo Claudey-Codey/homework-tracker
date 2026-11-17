@@ -1,4 +1,5 @@
 import Foundation
+import PDFKit
 import UIKit
 
 /// In-progress checklist step held by `AssignmentFormView` before it is
@@ -16,27 +17,37 @@ struct DraftNote: Identifiable, Equatable {
     var text: String
 }
 
-/// An image held by a form before Save — either picked since the form opened,
+/// An image or PDF held by a form before Save — either picked since the form opened,
 /// or copied from a saved `ImageAttachment` so Cancel leaves that untouched.
 struct DraftImage: Identifiable {
     let id = UUID()
     let data: Data
     let name: String
+    let isPDF: Bool
     /// The saved attachment this draft stands for; nil for a newly picked one.
     let saved: ImageAttachment?
     /// Decoded once and kept small, so list rows don't decode the full image
-    /// every time they redraw. Nil when the data isn't an image iOS can read.
+    /// every time they redraw. For a PDF it's the first page. Nil when the
+    /// data isn't something iOS can read.
     let thumbnail: UIImage?
 
-    init(data: Data, name: String, saved: ImageAttachment? = nil) {
+    init(data: Data, name: String, isPDF: Bool = false, saved: ImageAttachment? = nil) {
         self.data = data
         self.name = name
+        self.isPDF = isPDF
         self.saved = saved
-        self.thumbnail = Self.thumbnail(of: data)
+        self.thumbnail = isPDF ? Self.pdfThumbnail(of: data) : Self.thumbnail(of: data)
     }
 
     init(_ attachment: ImageAttachment) {
-        self.init(data: attachment.data, name: attachment.name, saved: attachment)
+        self.init(data: attachment.data, name: attachment.name,
+                  isPDF: attachment.isPDF, saved: attachment)
+    }
+
+    /// The first page, rendered small. Nil when the data isn't a PDF.
+    private static func pdfThumbnail(of data: Data) -> UIImage? {
+        guard let page = PDFDocument(data: data)?.page(at: 0) else { return nil }
+        return page.thumbnail(of: CGSize(width: 132, height: 132), for: .mediaBox)
     }
 
     /// Big enough to fill a 44pt square at 3x, aspect ratio kept.

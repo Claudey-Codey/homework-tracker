@@ -1,8 +1,8 @@
 import Foundation
 import SwiftData
 
-/// A picture attached to an assignment or an exam — a PNG, a photo of the
-/// worksheet, a screenshot of the slides. The bytes are kept exactly as picked.
+/// A picture or PDF attached to an assignment or an exam — a PNG, a photo of
+/// the worksheet, the slides as a PDF. The bytes are kept exactly as picked.
 @Model
 final class ImageAttachment {
     /// Stored beside the database rather than inside it, so loading a list of
@@ -13,14 +13,18 @@ final class ImageAttachment {
     /// Explicit ordering — SwiftData relationships come back unordered.
     var order: Int = 0
     var createdAt: Date = Date()
+    /// True for a PDF, false for an image. Kept as a flag so list rows can
+    /// count PDFs without loading the file itself.
+    var isPDF: Bool = false
     /// Exactly one of these is set: the image belongs to an exam or an assignment.
     var exam: Exam?
     var assignment: Assignment?
 
-    init(data: Data, name: String, order: Int) {
+    init(data: Data, name: String, order: Int, isPDF: Bool = false) {
         self.data = data
         self.name = name
         self.order = order
+        self.isPDF = isPDF
         self.createdAt = Date()
     }
 }
@@ -41,7 +45,8 @@ extension ModelContext {
                 existing.order = index
                 continue
             }
-            let image = ImageAttachment(data: draft.data, name: draft.name, order: index)
+            let image = ImageAttachment(data: draft.data, name: draft.name, order: index,
+                                        isPDF: draft.isPDF)
             attach(image)
             insert(image)
         }
