@@ -43,6 +43,9 @@
   --nav-height: 54px;
   --tabbar-height: 62px;
   --tabbar-bottom: max(10px, calc(var(--safe-bottom) - 12px));
+  /* How far the real bottom of the screen is below the viewport's bottom.
+     Non-zero only in iOS Home Screen apps; see support/viewport.ts. */
+  --bottom-gap: 0px;
 
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
@@ -181,7 +184,7 @@ svg {
 
 .app {
   position: fixed;
-  inset: 0;
+  inset: 0 0 calc(-1 * var(--bottom-gap));
   overflow: hidden;
   background: var(--bg-grouped);
 }
@@ -883,7 +886,7 @@ button.cell {
   position: fixed;
   z-index: 50;
   left: 50%;
-  bottom: var(--tabbar-bottom);
+  bottom: calc(var(--tabbar-bottom) - var(--bottom-gap));
   transform: translateX(-50%);
   width: min(calc(100% - 2 * var(--margin) - 8px), 420px);
   height: var(--tabbar-height);
@@ -926,7 +929,7 @@ button.cell {
 
 .sheet-backdrop {
   position: fixed;
-  inset: 0;
+  inset: 0 0 calc(-1 * var(--bottom-gap));
   z-index: 100;
   background: var(--dim);
   animation: fade-in 0.35s ease both;
@@ -943,7 +946,7 @@ button.cell {
   z-index: 101;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: calc(-1 * var(--bottom-gap));
   top: calc(var(--safe-top) + 10px);
   display: flex;
   flex-direction: column;
@@ -958,7 +961,7 @@ button.cell {
   top: auto;
   left: 8px;
   right: 8px;
-  bottom: max(8px, var(--safe-bottom));
+  bottom: calc(max(8px, var(--safe-bottom)) - var(--bottom-gap));
   border-radius: 36px;
   max-height: calc(100% - var(--safe-top) - 20px);
 }
@@ -1092,7 +1095,7 @@ button.cell {
 
 .menu-scrim {
   position: fixed;
-  inset: 0;
+  inset: 0 0 calc(-1 * var(--bottom-gap));
   z-index: 200;
 }
 
@@ -1136,7 +1139,7 @@ button.cell {
 
 .alert-backdrop {
   position: fixed;
-  inset: 0;
+  inset: 0 0 calc(-1 * var(--bottom-gap));
   z-index: 300;
   display: flex;
   align-items: center;
