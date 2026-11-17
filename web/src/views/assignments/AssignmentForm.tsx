@@ -13,6 +13,7 @@ import { SwipeRow } from "../../ui/SwipeRow";
 import { ToggleRow } from "../../ui/Toggle";
 import { ReminderSection } from "../ReminderEditor";
 import { subjectOptions, useSubjects } from "../useSubjects";
+import { TextField } from "../../ui/TextField";
 
 const isBlank = (text: string) => text.trim() === "";
 
@@ -134,11 +135,9 @@ export function AssignmentForm({ assignment }: { assignment?: Assignment }) {
         <List>
           <Section header="Details">
             <Row>
-              <input
-                className="field"
+              <TextField
                 placeholder="Assignment name"
                 value={title}
-                dir="auto"
                 onChange={(event) => setTitle(event.target.value)}
                 enterKeyHint="done"
               />
@@ -189,11 +188,9 @@ export function AssignmentForm({ assignment }: { assignment?: Assignment }) {
                     return turningOn && checklist.every((step) => step.id === item.id || step.isDone);
                   }}
                 />
-                <input
-                  className="field"
+                <TextField
                   placeholder="Step"
                   value={item.text}
-                  dir="auto"
                   ref={(el) => {
                     if (el) stepInputs.current.set(item.id, el);
                     else stepInputs.current.delete(item.id);
@@ -217,9 +214,8 @@ export function AssignmentForm({ assignment }: { assignment?: Assignment }) {
               <span style={{ color: "var(--green)", display: "flex", width: 26, justifyContent: "center" }}>
                 <PlusCircleFillIcon size={22} />
               </span>
-              <input
+              <TextField
                 ref={newStepInput}
-                className="field"
                 placeholder="Add a step"
                 value={newStep}
                 dir="auto"

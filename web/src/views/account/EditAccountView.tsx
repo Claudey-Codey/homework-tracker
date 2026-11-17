@@ -5,6 +5,7 @@ import { Screen, useNavigation } from "../../ui/NavStack";
 import { AvatarPickerView } from "./AvatarPickerView";
 import { AvatarView } from "./AvatarView";
 import { useAccount } from "./useAccount";
+import { TextField } from "../../ui/TextField";
 
 /// Edit the local profile: name, and a way into the avatar editor.
 /// Password is shown for shape only — there is no sign-in yet.
@@ -38,11 +39,9 @@ export function EditAccountView() {
 
         <Section header="Name">
           <Row>
-            <input
-              className="field"
+            <TextField
               placeholder="Full name"
               value={name}
-              dir="auto"
               autoCapitalize="words"
               autoCorrect="off"
               onChange={(event) => setName(event.target.value)}
