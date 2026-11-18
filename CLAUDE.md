@@ -145,8 +145,9 @@ don't have that problem, so there's nothing to port.)
 Web: `scripts/icon.svg` and `scripts/icon-dark.svg` (rendered by
 `scripts/render-icons.mjs`), switched in `index.html`.
 
-The web app now has a dark Home Screen icon: a near-black background, a dark
-grey card, and the green tick and blue marks in the dark-mode system colours.
+The web app now has a dark Home Screen icon: the same white card with its
+green tick and blue marks, on a near-black background instead of the blue
+one. The card stays white; the user doesn't want it dark.
 iOS can't switch a web app's icon by itself, so the page offers the dark icon
 when the phone is in dark mode and iOS keeps whichever it was given when the
 app was added.
