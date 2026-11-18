@@ -1,6 +1,6 @@
 {
-  "name": "TaskMng",
-  "short_name": "TaskMng",
+  "name": "Donedey",
+  "short_name": "Donedey",
   "description": "Assignments, homework and exams — a school planner.",
   "start_url": "./",
   "scope": "./",

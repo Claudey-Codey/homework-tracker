@@ -71,7 +71,7 @@ function haptic(pattern: number | number[] = 10) {
     const input = document.createElement("input");
     input.type = "checkbox";
     input.setAttribute("switch", "");
-    input.id = "taskmng-haptic";
+    input.id = "donedey-haptic";
     hapticLabel = document.createElement("label");
     hapticLabel.htmlFor = input.id;
     hapticLabel.style.display = "none";

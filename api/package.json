@@ -1,12 +1,12 @@
 {
-  "name": "taskmng-api",
+  "name": "donedey-api",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler d1 migrations apply taskmng --remote && wrangler deploy",
-    "migrate:local": "wrangler d1 migrations apply taskmng --local",
+    "deploy": "wrangler d1 migrations apply donedey --remote && wrangler deploy",
+    "migrate:local": "wrangler d1 migrations apply donedey --local",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

@@ -8,7 +8,10 @@ import { keys, writeSetting } from "./settings";
 /// iPhone keeps a Home Screen app's data with that one icon, so removing the
 /// icon erases it. A backup is how the data survives re-adding the app.
 
-const format = "taskmng-backup";
+const format = "donedey-backup";
+/// Backups made before the app was renamed from TaskMng carry this format, and
+/// people still have those files, so they must keep restoring.
+const legacyFormats = ["taskmng-backup"];
 const version = 1;
 
 interface BackupFile {
@@ -84,7 +87,7 @@ export async function shareBackup(): Promise<void> {
   };
 
   const date = new Date().toISOString().slice(0, 10);
-  const file = new File([JSON.stringify(backup)], `TaskMng Backup ${date}.json`, {
+  const file = new File([JSON.stringify(backup)], `Donedey Backup ${date}.json`, {
     type: "application/json",
   });
 
@@ -124,13 +127,14 @@ export async function restoreBackup(file: File): Promise<BackupSummary> {
   try {
     backup = JSON.parse(await file.text()) as Backup;
   } catch {
-    throw new Error("That file isn't a TaskMng backup.");
+    throw new Error("That file isn't a Donedey backup.");
   }
-  if (backup?.format !== format || !Array.isArray(backup.assignments)) {
-    throw new Error("That file isn't a TaskMng backup.");
+  const knownFormat = backup?.format === format || legacyFormats.includes(backup?.format);
+  if (!knownFormat || !Array.isArray(backup.assignments)) {
+    throw new Error("That file isn't a Donedey backup.");
   }
   if (backup.version > version) {
-    throw new Error("That backup was made by a newer version of TaskMng. Update the app and try again.");
+    throw new Error("That backup was made by a newer version of Donedey. Update the app and try again.");
   }
 
   const files = await Promise.all(

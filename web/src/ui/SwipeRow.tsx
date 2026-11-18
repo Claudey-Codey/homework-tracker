@@ -12,7 +12,7 @@ export interface SwipeAction {
 
 const actionWidth = 76;
 /// Only one row is open at a time, as in UIKit.
-const openEvent = "taskmng-swipe-open";
+const openEvent = "donedey-swipe-open";
 
 export function SwipeRow({
   leading = [],

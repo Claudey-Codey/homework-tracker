@@ -1,4 +1,4 @@
-# TaskMng
+# Donedey
 
 A school assignment and exam tracker, built twice with the same design and
 features:
@@ -6,16 +6,22 @@ features:
 - `web/`: React 18 + TypeScript + Vite, data in IndexedDB through Dexie. It
   installs on an iPhone from Safari (Add to Home Screen). Pushing `web/**` to
   `main` deploys it to GitHub Pages (`.github/workflows/deploy-web.yml`).
-- `TaskMng/`: the native SwiftUI + SwiftData iOS app (iOS 17+), set up with
+- `Donedey/`: the native SwiftUI + SwiftData iOS app (iOS 17+), set up with
   `project.yml` (XcodeGen) or by hand as described in `README.md`.
 - `api/`: the server for accounts and sync, a Cloudflare Worker with a D1
   database and an R2 bucket (`api/README.md`). Pushing `api/**` to `main`
   deploys it (`.github/workflows/deploy-api.yml`).
 
+The app used to be called TaskMng. A few stored names keep the old spelling
+on purpose, because renaming them would lose people's data: the web's
+IndexedDB database (`taskmng`), the iOS bundle identifier
+(`com.tunimamluk.TaskMng`), and the format id of old backup files, which
+still restore. Don't rename those.
+
 ## Current focus: the web app only
 
 Make changes in `web/` (and `api/` for the server) only. Don't edit
-`TaskMng/` unless the user asks to update the iOS app.
+`Donedey/` unless the user asks to update the iOS app.
 
 Every user-facing change to the web app goes in the **iOS backlog** below, in
 the same commit, so the iOS app can be brought up to date later without
@@ -43,9 +49,9 @@ When the user asks to update the iOS app:
 
 ### File map (web → iOS)
 
-| Web (`web/src/`) | iOS (`TaskMng/`) |
+| Web (`web/src/`) | iOS (`Donedey/`) |
 |---|---|
-| `db.ts` | `Models/*.swift`, `TaskMngApp.swift` |
+| `db.ts` | `Models/*.swift`, `DonedeyApp.swift` |
 | `views/NotesSection.tsx` | `Views/Components/NotesSection.swift` |
 | `views/scanner/DocumentScanner.tsx`, `support/scan/*` | `Views/Components/CaptureViews.swift` (VisionKit's scanner) |
 | `support/sync/*`, `views/account/SyncSection.tsx` | new: `Support/Sync/*`, `Views/Account/SyncSection.swift` |

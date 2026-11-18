@@ -1,4 +1,4 @@
-# TaskMng — School Assignment & Exam Manager
+# Donedey — School Assignment & Exam Manager
 
 A native SwiftUI + SwiftData iOS app to track assignments, homework, and exams.
 
@@ -32,22 +32,34 @@ A native SwiftUI + SwiftData iOS app to track assignments, homework, and exams.
 ### Step 2 — Make the project
 **Option A — manual (recommended for a first app, no extra tools):**
 1. Xcode → **File ▸ New ▸ Project… ▸ iOS ▸ App** → Next.
-2. Product Name: `TaskMng`. Interface: **SwiftUI**. Storage: **SwiftData**. Language: **Swift**.
+2. Product Name: `Donedey`. Interface: **SwiftUI**. Storage: **SwiftData**. Language: **Swift**.
 3. Save it — you can save into `/Users/tuni/code/taskmng` (let it create its own subfolder, or point it here).
 4. In Xcode's file navigator, **delete the template `ContentItem`/`Item.swift` and the default `ContentView.swift`** (Move to Trash).
-5. **Drag the `TaskMng/` source folders** from this project (Models, Views, Support, `TaskMngApp.swift`) into the Xcode project navigator. When prompted, check **"Copy items if needed"** and **"Create groups"**, and make sure the **TaskMng target** is checked.
-6. If Xcode's template also generated its own `TaskMngApp.swift`, keep only one `@main` (delete the template's, keep the one from this repo).
+5. **Drag the `Donedey/` source folders** from this project (Models, Views, Support, `DonedeyApp.swift`) into the Xcode project navigator. When prompted, check **"Copy items if needed"** and **"Create groups"**, and make sure the **Donedey target** is checked.
+6. If Xcode's template also generated its own `DonedeyApp.swift`, keep only one `@main` (delete the template's, keep the one from this repo).
 7. Set the deployment target to **iOS 17.0** (project ▸ target ▸ General ▸ Minimum Deployments).
-8. Let the app use the camera (for scanning and photos): project ▸ target ▸ **Info** ▸ hover any row ▸ **+** ▸ choose **Privacy - Camera Usage Description**, and set it to *Scan worksheets and take photos to attach to assignments and exams.* Without it the app closes when you tap Scan Document or Take Photo.
+8. Set the bundle identifier to `com.tunimamluk.TaskMng` (project ▸ target ▸ **Signing & Capabilities** ▸ Bundle Identifier). It keeps the app's old name on purpose: iOS knows an app by its bundle ID, so with a new one Donedey would install as a separate app and the assignments and exams already on your iPhone wouldn't carry over. The name under the icon comes from the Product Name, `Donedey`.
+9. Let the app use the camera (for scanning and photos): project ▸ target ▸ **Info** ▸ hover any row ▸ **+** ▸ choose **Privacy - Camera Usage Description**, and set it to *Scan worksheets and take photos to attach to assignments and exams.* Without it the app closes when you tap Scan Document or Take Photo.
 
 **Option B — generate the project with XcodeGen (one command):**
 ```bash
 brew install xcodegen
 cd /Users/tuni/code/taskmng
 xcodegen generate
-open TaskMng.xcodeproj
+open Donedey.xcodeproj
 ```
 (`project.yml` in this folder configures it.)
+
+> **Made the Xcode project before the rename?** The app used to be called
+> TaskMng, and its folder was renamed from `TaskMng/` to `Donedey/` (and
+> `TaskMngApp.swift` to `DonedeyApp.swift`). If you use XcodeGen, run
+> `xcodegen generate` again and open `Donedey.xcodeproj`. If you made the
+> project by hand, Xcode now shows the old files in red because they're
+> missing: select them, delete them (Remove References), and drag the
+> `Donedey` folder's contents back in as in step 5. To show Donedey under the
+> icon, set **Display Name** to `Donedey` (project ▸ target ▸ General ▸
+> Identity). Keep the bundle identifier `com.tunimamluk.TaskMng` so the app on
+> your iPhone keeps its data.
 
 ### Step 3 — Run in the Simulator
 Pick an iPhone simulator in the toolbar and press **⌘R**. Try it: add a subject, then an assignment, then an exam.
@@ -56,7 +68,7 @@ Pick an iPhone simulator in the toolbar and press **⌘R**. Try it: add a subjec
 1. On the iPhone: **Settings ▸ Privacy & Security ▸ Developer Mode** → On (it restarts).
 2. Plug the iPhone into the Mac; trust the computer.
 3. In Xcode: project ▸ target ▸ **Signing & Capabilities** → check **Automatically manage signing** → **Team** → *Add an Account…* and sign in with your Apple ID (this creates a free **Personal Team**).
-4. If signing complains about the bundle ID, change it to something unique like `com.yourname.TaskMng`.
+4. If signing complains about the bundle ID, change it to something unique like `com.yourname.Donedey`. A new bundle ID installs as a separate app, so anything in an app you installed before under the old ID stays there.
 5. Select your iPhone as the run destination → **⌘R**.
 6. On the iPhone: **Settings ▸ General ▸ VPN & Device Management** → trust your developer profile.
 
@@ -66,8 +78,8 @@ Pick an iPhone simulator in the toolbar and press **⌘R**. Try it: add a subjec
 
 ## Project structure
 ```
-TaskMng/
-  TaskMngApp.swift              @main App + SwiftData container
+Donedey/
+  DonedeyApp.swift              @main App + SwiftData container
   Models/
     Subject.swift              Subject (name, color, isActive)
     Assignment.swift           Assignment + AssignmentType enum

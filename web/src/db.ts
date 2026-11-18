@@ -110,6 +110,9 @@ class TaskDatabase extends Dexie {
   syncState!: EntityTable<SyncStateEntry, "key">;
 
   constructor() {
+    /// Still named after the app's old name, TaskMng: IndexedDB finds data by
+    /// this name, so renaming it would open a new, empty database and every
+    /// installed copy would lose its assignments, exams and files.
     super("taskmng");
     this.version(1).stores({
       subjects: "id, name",

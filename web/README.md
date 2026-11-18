@@ -1,4 +1,4 @@
-# TaskMng for the web
+# Donedey for the web
 
 The same app as the iOS version, rebuilt as a web app you can add to your
 iPhone's Home Screen. No Mac, Xcode or Apple account needed, and it doesn't
@@ -6,7 +6,7 @@ expire after 7 days.
 
 Built with React + TypeScript + Vite. Everything is stored on the device, in
 the browser's IndexedDB, and works offline. With an account (**Account ▸
-Create Account…**, signed in with a passkey) it also syncs to the TaskMng API
+Create Account…**, signed in with a passkey) it also syncs to the Donedey API
 in [`../api/`](../api/README.md), a Cloudflare Worker with a D1 database, so
 your other devices see the same assignments, exams, subjects and profile.
 
@@ -69,7 +69,7 @@ paths are relative, so it works at the root of a domain or in a sub-folder.
 
 ## How it maps to the iOS app
 
-| iOS (`TaskMng/`)               | Web (`web/src/`)                         |
+| iOS (`Donedey/`)               | Web (`web/src/`)                         |
 |--------------------------------|------------------------------------------|
 | SwiftData models (`Models/`)   | `db.ts` (IndexedDB via Dexie)            |
 | `@AppStorage`                  | `support/settings.ts` (localStorage)     |

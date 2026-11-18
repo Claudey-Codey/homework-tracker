@@ -41,5 +41,5 @@ jobs:
           cache-dependency-path: api/package-lock.json
       - run: npm ci
       - run: npm run typecheck
-      - run: npx wrangler d1 migrations apply taskmng --remote
+      - run: npx wrangler d1 migrations apply donedey --remote
       - run: npx wrangler deploy

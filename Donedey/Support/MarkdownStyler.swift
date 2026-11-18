@@ -4,9 +4,9 @@ import UIKit
 extension NSAttributedString.Key {
     /// Which block style a paragraph is in. Stored across the whole paragraph
     /// so the block survives editing and can be recovered on serialization.
-    static let blockStyle = NSAttributedString.Key("taskmng.blockStyle")
+    static let blockStyle = NSAttributedString.Key("donedey.blockStyle")
     /// Marks a run as inline code, since a monospaced font alone is ambiguous.
-    static let inlineCode = NSAttributedString.Key("taskmng.inlineCode")
+    static let inlineCode = NSAttributedString.Key("donedey.inlineCode")
 }
 
 enum BlockStyle: Int {

@@ -1,10 +1,10 @@
-# TaskMng API
+# Donedey API
 
-The server behind TaskMng accounts: a Cloudflare Worker with
+The server behind Donedey accounts: a Cloudflare Worker with
 
-- a **D1** database (`taskmng`) for accounts, passkeys, sessions and the
+- a **D1** database (`donedey`) for accounts, passkeys, sessions and the
   synced records (subjects, assignments, exams, the profile), and
-- an **R2** bucket (`taskmng-files`) for attached images and PDFs and the
+- an **R2** bucket (`donedey-files`) for attached images and PDFs and the
   profile photo.
 
 The web app on GitHub Pages calls it across origins. Only the origins in
@@ -32,20 +32,24 @@ The routes are listed at the top of `src/index.ts`.
 
 ## Set it up on Cloudflare (once)
 
-1. Create the database and the bucket, either with the Cloudflare dashboard or:
+1. The database and the bucket already exist on Cloudflare, as `donedey` (D1)
+   and `donedey-files` (R2), and the database's id is in `wrangler.jsonc`
+   (`database_id`). To recreate them, for example on another Cloudflare
+   account, use the Cloudflare dashboard or:
 
    ```bash
    cd api
    npm ci
    npx wrangler login
-   npx wrangler d1 create taskmng
-   npx wrangler r2 bucket create taskmng-files
+   npx wrangler d1 create donedey
+   npx wrangler r2 bucket create donedey-files
    ```
 
-2. Put the new database's id in `wrangler.jsonc` (`database_id`).
+2. If you recreated the database, put its new id in `wrangler.jsonc`
+   (`database_id`).
 3. Deploy: `npm run deploy` applies the migrations and publishes the Worker.
    It prints the Worker's address, such as
-   `https://taskmng-api.<your-subdomain>.workers.dev`.
+   `https://donedey-api.<your-subdomain>.workers.dev`.
 4. Put that address in `web/.env.production` as `VITE_API_URL=…` and push.
    The next web deploy shows Create Account and Sign In on the Account tab.
 

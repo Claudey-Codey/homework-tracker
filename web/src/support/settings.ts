@@ -4,7 +4,7 @@ import { useCallback, useSyncExternalStore } from "react";
 /// component reading a key re-rendering when any other one writes it.
 
 const listeners = new Set<() => void>();
-const changeEvent = "taskmng-setting";
+const changeEvent = "donedey-setting";
 
 function subscribe(listener: () => void) {
   listeners.add(listener);

@@ -20,7 +20,7 @@ function listFiles(dir: string): string[] {
 /// pick up the update.
 function serviceWorker(): Plugin {
   return {
-    name: "taskmng-service-worker",
+    name: "donedey-service-worker",
     apply: "build",
     enforce: "post",
     generateBundle(_, bundle) {
@@ -41,7 +41,7 @@ function serviceWorker(): Plugin {
 }
 
 // `base: "./"` keeps every URL relative, so the build works wherever it's
-// hosted — the root of a domain or a sub-path like /taskmng/.
+// hosted — the root of a domain or a sub-path like /donedey/.
 /// Shown at the bottom of Settings so you can tell which build a phone is
 /// running. On GitHub the commit is known; locally it says "dev".
 const buildCommit = process.env.GITHUB_SHA?.slice(0, 7) ?? "dev";

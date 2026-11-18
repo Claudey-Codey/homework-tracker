@@ -1,8 +1,9 @@
-// The TaskMng API: accounts with passkeys, and sync for the web app.
-// `database_id` is filled in once the D1 database exists (see README.md).
+// The Donedey API: accounts with passkeys, and sync for the web app.
+// `database_id` is the id Cloudflare gave the `donedey` D1 database when it
+// was created (see README.md).
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "taskmng-api",
+  "name": "donedey-api",
   "main": "src/index.ts",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat"],
@@ -16,12 +17,12 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "taskmng",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_name": "donedey",
+      "database_id": "300c8c6e-5d4c-46cc-8b61-db215abb45c4",
       "migrations_dir": "migrations"
     }
   ],
   "r2_buckets": [
-    { "binding": "FILES", "bucket_name": "taskmng-files" }
+    { "binding": "FILES", "bucket_name": "donedey-files" }
   ]
 }

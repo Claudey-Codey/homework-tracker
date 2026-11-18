@@ -13,7 +13,7 @@ import { base64url, fromBase64url, HttpError, json, randomToken, readJSON, sha25
 /// signing in uses it. A successful ceremony hands back a session token that
 /// the app sends as `Authorization: Bearer …`.
 
-const rpName = "TaskMng";
+const rpName = "Donedey";
 const challengeLifetime = 5 * 60 * 1000;
 const sessionLifetime = 365 * 24 * 60 * 60 * 1000;
 
@@ -129,7 +129,7 @@ export async function registerVerify(request: Request, env: Env, origin: string)
 }
 
 /// Step 1 of signing in. No account is named: the browser offers whichever
-/// TaskMng passkeys the device has.
+/// Donedey passkeys the device has.
 export async function loginOptions(env: Env, origin: string): Promise<Response> {
   const options = await generateAuthenticationOptions({ rpID: rpID(origin), userVerification: "preferred" });
   const challengeId = await saveChallenge(env, options.challenge);

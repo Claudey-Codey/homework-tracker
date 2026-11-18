@@ -10,7 +10,7 @@ import {
 import { allowedOrigin, HttpError, json, withCors, type Env } from "./http";
 import { deleteFile, getFile, pull, push, putFile } from "./sync";
 
-/// The TaskMng API. The web app lives on GitHub Pages, so every request is
+/// The Donedey API. The web app lives on GitHub Pages, so every request is
 /// cross-origin: only the origins in ALLOWED_ORIGINS are answered, and
 /// sign-in uses a bearer token rather than a cookie (Safari blocks
 /// third-party cookies).

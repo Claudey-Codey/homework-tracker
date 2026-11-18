@@ -1,6 +1,6 @@
 import { readSetting, removeSetting, writeSetting } from "../settings";
 
-/// Talking to the TaskMng API (the Cloudflare Worker in `api/`), and the
+/// Talking to the Donedey API (the Cloudflare Worker in `api/`), and the
 /// signed-in session it hands out.
 
 /// Where the API lives, from `VITE_API_URL` at build time. Without one the

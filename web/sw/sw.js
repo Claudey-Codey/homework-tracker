@@ -1,11 +1,13 @@
-// TaskMng service worker: keeps the app working offline.
+// Donedey service worker: keeps the app working offline.
 //
 // The list of files and the version are filled in at build time by the
 // `serviceWorker` plugin in vite.config.ts.
 
 const VERSION = "__VERSION__";
 const PRECACHE = __PRECACHE__;
-const CACHE = `taskmng-${VERSION}`;
+/// The "activate" handler below deletes every cache with another name, which
+/// also clears the ones from before the rename (named "taskmng-…").
+const CACHE = `donedey-${VERSION}`;
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

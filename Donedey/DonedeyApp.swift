@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 @main
-struct TaskMngApp: App {
+struct DonedeyApp: App {
     var body: some Scene {
         WindowGroup {
             RootTabView()
