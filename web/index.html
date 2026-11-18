@@ -20,7 +20,26 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="TaskMng" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <!-- The Home Screen icon. iOS can't switch a web app's icon between
+         light and dark the way it does for App Store apps; it copies the
+         icon once, when the app is added. So the link points at the dark
+         icon whenever the phone is in dark mode, and adding the app then
+         gives the dark one. There's a single link on purpose: nothing says
+         how iOS would choose between two. -->
+    <link id="home-screen-icon" rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <script>
+      (function () {
+        var dark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+        if (!dark) return;
+        var show = function () {
+          document.getElementById("home-screen-icon").href = dark.matches
+            ? "./icons/apple-touch-icon-dark.png"
+            : "./icons/apple-touch-icon.png";
+        };
+        show();
+        dark.addEventListener("change", show);
+      })();
+    </script>
     <link rel="icon" type="image/png" href="./icons/icon-192.png" />
     <link rel="manifest" href="./manifest.webmanifest" />
   </head>

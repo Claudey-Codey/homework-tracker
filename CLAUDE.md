@@ -140,6 +140,24 @@ Web: `selectTab` in `App.tsx`, `popToRoot` in `ui/NavStack.tsx`.
 Assignment or New Exam form closed the form too. SwiftUI's nested sheets
 don't have that problem, so there's nothing to port.)
 
+### 6. App icon with a dark version
+
+Web: `scripts/icon.svg` and `scripts/icon-dark.svg` (rendered by
+`scripts/render-icons.mjs`), switched in `index.html`.
+
+The web app now has a dark Home Screen icon: a near-black background, a dark
+grey card, and the green tick and blue marks in the dark-mode system colours.
+iOS can't switch a web app's icon by itself, so the page offers the dark icon
+when the phone is in dark mode and iOS keeps whichever it was given when the
+app was added.
+
+The iOS app has no app icon yet (there's no asset catalog in `TaskMng/`). Add
+`TaskMng/Assets.xcassets/AppIcon.appiconset` with one 1024 × 1024 icon in
+three appearances (Any, Dark, Tinted): render `icon.svg` for Any and
+`icon-dark.svg` for Dark, and for Tinted a greyscale version of the dark icon
+on a transparent background. iOS then switches between them on its own. Set
+`ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon` in `project.yml`.
+
 ## Working on the web app
 
 - Run commands in `web/`: `npm ci`, `npm run dev`, `npm run typecheck`, and
