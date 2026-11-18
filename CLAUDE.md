@@ -110,6 +110,17 @@ there's nothing else to port. One difference to fix: the web names a scan
 numbering a repeat as "Scan – Nov 18 (2).pdf" with the number before the
 extension.
 
+### 4. Exam rows: counts instead of note titles
+
+Web: `ExamRow` in `views/exams/ExamsView.tsx`.
+
+An exam's row in the Exams list no longer lists its study notes by title or
+has separate "1 image" / "2 PDFs" lines. Like an assignment's row, it shows
+one line of counts: note icon and number, photo icon and number, PDF icon and
+number, each only when there is at least one. iOS: change the exam row in
+`Views/Exams/ExamsView.swift` to match the counts line in
+`Views/Assignments/AssignmentRow.swift`.
+
 ## Working on the web app
 
 - Run commands in `web/`: `npm ci`, `npm run dev`, `npm run typecheck`, and

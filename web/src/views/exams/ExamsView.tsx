@@ -3,7 +3,6 @@ import { useState } from "react";
 import { db, deleteExam, isPdf, type Exam, type Subject } from "../../db";
 import { formatMonthDay, formatTime } from "../../support/dates";
 import { urgencyColor } from "../../support/due";
-import { noteTitle } from "../../support/noteText";
 import { noSubjectHex } from "../../support/theme";
 import { ContentUnavailable } from "../../ui/ContentUnavailable";
 import { GlassButton } from "../../ui/GlassButton";
@@ -79,6 +78,7 @@ export function ExamsView() {
 function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
   const accent = subject?.colorHex ?? noSubjectHex;
   const displayTitle = exam.title || subject?.name || "Exam";
+  const noteCount = exam.notes.length;
   const pdfCount = exam.images?.filter(isPdf).length ?? 0;
   const imageCount = (exam.images?.length ?? 0) - pdfCount;
 
@@ -93,26 +93,27 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
           <span className="caption secondary" dir="auto">{subject.name}</span>
         )}
 
-        {exam.notes.length > 0 && (
-          <span className="subheadline secondary" style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
-            <NoteIcon size={15} strokeWidth={2} style={{ marginTop: 2 }} />
-            <span className="line-clamp-2" dir="auto">
-              {exam.notes.map((note) => noteTitle(note.text)).join(" · ")}
-            </span>
-          </span>
-        )}
-
-        {imageCount > 0 && (
-          <span className="caption secondary" style={{ display: "flex", gap: 4, alignItems: "center" }}>
-            <PhotoIcon size={13} strokeWidth={2.2} />
-            {imageCount === 1 ? "1 image" : `${imageCount} images`}
-          </span>
-        )}
-
-        {pdfCount > 0 && (
-          <span className="caption secondary" style={{ display: "flex", gap: 4, alignItems: "center" }}>
-            <PdfIcon size={13} strokeWidth={2.2} />
-            {pdfCount === 1 ? "1 PDF" : `${pdfCount} PDFs`}
+        {/* What's attached, as counts, the same as on an assignment's row. */}
+        {(noteCount > 0 || imageCount > 0 || pdfCount > 0) && (
+          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {noteCount > 0 && (
+              <span className="caption secondary" style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <NoteIcon size={13} strokeWidth={2.2} />
+                {noteCount}
+              </span>
+            )}
+            {imageCount > 0 && (
+              <span className="caption secondary" style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <PhotoIcon size={13} strokeWidth={2.2} />
+                {imageCount}
+              </span>
+            )}
+            {pdfCount > 0 && (
+              <span className="caption secondary" style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <PdfIcon size={13} strokeWidth={2.2} />
+                {pdfCount}
+              </span>
+            )}
           </span>
         )}
       </div>
