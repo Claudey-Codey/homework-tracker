@@ -164,7 +164,6 @@ Web: `Exam.score` in `db.ts`, `ExamForm.tsx`, `ExamRow` in
   there at all.
 - Backups include the score automatically, as part of the exam.
 
-
 ## Working on the web app
 
 - Run commands in `web/`: `npm ci`, `npm run dev`, `npm run typecheck`, and
