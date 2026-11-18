@@ -16,9 +16,12 @@ import { isPdf, type StudyNote } from "../db";
 import { newId } from "../support/id";
 import {
   attachableTypes,
+  datedName,
+  draftFromFile,
   imageTypes,
   pickFiles,
   sortFiles,
+  uniqueName,
   useImageURL,
   type DraftImage,
   type FileSource,
@@ -35,6 +38,7 @@ import {
   PencilIcon,
   PhotoIcon,
   ReorderIcon,
+  ScanIcon,
   ShareIcon,
   TrashIcon,
   UploadIcon,
@@ -47,6 +51,11 @@ import { SwipeRow } from "../ui/SwipeRow";
 /// first time a note is opened.
 const StudyNoteEditor = lazy(() =>
   import("./exams/StudyNoteEditor").then((module) => ({ default: module.StudyNoteEditor })),
+);
+
+/// The scanner is only downloaded the first time it's opened, too.
+const DocumentScanner = lazy(() =>
+  import("./scanner/DocumentScanner").then((module) => ({ default: module.DocumentScanner })),
 );
 
 /// In-progress note, held by a form until Save.
@@ -112,12 +121,13 @@ export function NotesSection({
   const [menuAnchor, setMenuAnchor] = useState<DOMRect | null>(null);
   const [dragging, setDragging] = useState<string | null>(null);
   const [dropping, setDropping] = useState(false);
+  const [scanning, setScanning] = useState(false);
   const addRow = useRef<HTMLButtonElement>(null);
   const grips = useRef(new Map<string, HTMLElement>());
 
   // Read from window listeners, which outlive the render they were set up in.
   const latest = useRef({ images, busy: false });
-  latest.current = { images, busy: editingNote !== null || viewingImage !== null || renaming !== null };
+  latest.current = { images, busy: editingNote !== null || viewingImage !== null || renaming !== null || scanning };
 
   /// Every way of adding files ends here: they're sorted into images, PDFs
   /// and notes, and anything that couldn't be added is listed in one alert.
@@ -198,6 +208,14 @@ export function NotesSection({
     onChange((current) => current.filter((note) => !isBlank(note.text)));
   };
 
+  /// A finished scan becomes one PDF, "Scan – Nov 18.pdf".
+  const addScan = (pdf: Blob) => {
+    const taken = latest.current.images.map((image) => image.name);
+    const base = uniqueName(datedName("Scan"), taken.map((name) => name.replace(/\.pdf$/i, "")));
+    const file = new File([pdf], `${base}.pdf`, { type: "application/pdf" });
+    onImagesChange((current) => [...current, draftFromFile(file, "pdf")]);
+  };
+
   const move = (id: string, to: number) => {
     const current = latest.current.images;
     const from = current.findIndex((image) => image.id === id);
@@ -256,6 +274,12 @@ export function NotesSection({
   const menuItems: MenuEntry[] = [
     { label: "New Note", icon: <ComposeIcon size={20} />, onSelect: addNote },
     "divider",
+    {
+      label: "Scan Document",
+      detail: "Saves as one PDF",
+      icon: <ScanIcon size={20} />,
+      onSelect: () => setScanning(true),
+    },
     ...(touch
       ? ([
           {
@@ -394,6 +418,12 @@ export function NotesSection({
           </Suspense>
         )}
       </Sheet>
+
+      {scanning && (
+        <Suspense fallback={null}>
+          <DocumentScanner onSave={addScan} onClose={() => setScanning(false)} />
+        </Suspense>
+      )}
 
       <Prompt
         title="Rename"

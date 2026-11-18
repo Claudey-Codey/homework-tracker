@@ -1633,3 +1633,420 @@ button.cell {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* ---------- Document scanner ---------- */
+
+/* Full screen and always dark, like the camera, whatever the app's theme. */
+.scanner {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: #000;
+  color: #fff;
+  animation: fade-in 0.2s ease both;
+}
+
+.scanner-camera,
+.scanner-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+}
+
+.scanner-camera[hidden] {
+  display: none;
+}
+
+.scanner-top,
+.scanner-bottom {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+.scanner-top {
+  min-height: 56px;
+  padding-top: calc(var(--safe-top) + 6px);
+  padding-bottom: 6px;
+}
+
+.scanner-top > :last-child {
+  justify-self: end;
+}
+
+.scanner-bottom {
+  padding-top: 18px;
+  padding-bottom: calc(var(--safe-bottom) + 22px);
+}
+
+.scanner-bottom > :first-child {
+  justify-self: start;
+}
+
+.scanner-bottom > :last-child {
+  justify-self: end;
+}
+
+.scanner-title {
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.scanner-text-button {
+  justify-self: start;
+  padding: 8px 4px;
+  font-size: 17px;
+  color: #fff;
+}
+
+.scanner-text-button.strong {
+  font-weight: 600;
+  color: #ffd60a;
+}
+
+.scanner-pill {
+  padding: 7px 14px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.scanner-pill[aria-pressed="true"] {
+  color: #ffd60a;
+}
+
+.scanner-viewfinder,
+.scanner-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.scanner-viewfinder video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.scanner-outline {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.scanner-outline polygon {
+  fill: rgba(10, 132, 255, 0.28);
+  stroke: #0a84ff;
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  transition: all 0.1s linear;
+}
+
+.scanner-hint {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 7px 14px;
+  border-radius: 99px;
+  background: rgba(0, 0, 0, 0.55);
+  font-size: 15px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.scanner-flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  pointer-events: none;
+  animation: scanner-flash 0.35s ease-out forwards;
+}
+
+@keyframes scanner-flash {
+  from {
+    opacity: 0.85;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.scanner-no-camera {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+  color: rgba(235, 235, 245, 0.6);
+}
+
+.scanner-no-camera strong {
+  font-size: 20px;
+  color: #fff;
+}
+
+.scanner-no-camera span {
+  max-width: 34ch;
+}
+
+.scanner-no-camera .prominent-button {
+  margin-top: 10px;
+}
+
+.scanner-shutter {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  padding: 4px;
+}
+
+.scanner-shutter span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.12s;
+}
+
+.scanner-shutter:active span {
+  transform: scale(0.88);
+}
+
+.scanner-shutter:disabled {
+  opacity: 0.5;
+}
+
+.scanner-stack {
+  position: relative;
+  width: 48px;
+  height: 62px;
+}
+
+.scanner-stack img,
+.scanner-stack-under {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.scanner-stack-under {
+  transform: translate(5px, -5px);
+  opacity: 0.6;
+}
+
+.scanner-stack img {
+  animation: scanner-land 0.4s var(--spring) both;
+}
+
+@keyframes scanner-land {
+  from {
+    transform: scale(1.6) translateY(-40px);
+    opacity: 0;
+  }
+}
+
+.scanner-count {
+  position: absolute;
+  top: -10px;
+  right: -12px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 11px;
+  background: #0a84ff;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 22px;
+  text-align: center;
+}
+
+.scanner-save {
+  padding: 9px 16px;
+  border-radius: 99px;
+  background: #0a84ff;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.scanner-save:disabled {
+  opacity: 0.35;
+}
+
+.scanner-stage {
+  touch-action: none;
+}
+
+.scanner-stage img {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.scanner-crop {
+  position: absolute;
+  inset: 0;
+}
+
+.scanner-crop-dim {
+  fill: rgba(0, 0, 0, 0.55);
+}
+
+.scanner-crop-edge {
+  fill: none;
+  stroke: #0a84ff;
+  stroke-width: 2;
+}
+
+.scanner-corner {
+  fill: rgba(255, 255, 255, 0.25);
+  stroke: #fff;
+  stroke-width: 2.5;
+  cursor: grab;
+  transition: r 0.15s;
+}
+
+.scanner-corner:focus-visible {
+  outline: none;
+  stroke: #ffd60a;
+}
+
+.scanner-loupe {
+  position: absolute;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  background-color: #000;
+  background-repeat: no-repeat;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+/* A + where the corner is, at the centre of the magnifier. */
+.scanner-loupe::before,
+.scanner-loupe::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  background: #0a84ff;
+  transform: translate(-50%, -50%);
+}
+
+.scanner-loupe::before {
+  width: 18px;
+  height: 2px;
+}
+
+.scanner-loupe::after {
+  width: 2px;
+  height: 18px;
+}
+
+.scanner-pages {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.scanner-pages::-webkit-scrollbar {
+  display: none;
+}
+
+.scanner-page {
+  flex: 0 0 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  scroll-snap-align: center;
+}
+
+.scanner-page img {
+  max-width: 100%;
+  max-height: 100%;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+}
+
+.scanner-toolbar {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-around;
+  padding: 14px max(16px, env(safe-area-inset-right, 0px)) calc(var(--safe-bottom) + 18px)
+    max(16px, env(safe-area-inset-left, 0px));
+}
+
+.scanner-toolbar button {
+  display: flex;
+  padding: 8px;
+  color: #0a84ff;
+}
+
+.scanner-toolbar button:disabled {
+  opacity: 0.4;
+}
+
+.scanner-filters {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: max-content;
+  bottom: calc(var(--safe-bottom) + 84px);
+  min-width: 220px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(44, 44, 46, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  animation: menu-in 0.25s var(--spring) both;
+  transform-origin: bottom center;
+}
+
+.scanner-filters button {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  color: #fff;
+  font-size: 17px;
+}
+
+.scanner-filters button + button {
+  border-top: 0.5px solid rgba(84, 84, 88, 0.65);
+}
+
+.scanner-alert {
+  z-index: 410;
+  color: var(--label);
+}
+
+.alert-button.destructive {
+  color: var(--red);
+}

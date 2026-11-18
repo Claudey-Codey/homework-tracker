@@ -44,6 +44,7 @@ When the user asks to update the iOS app:
 |---|---|
 | `db.ts` | `Models/*.swift`, `TaskMngApp.swift` |
 | `views/NotesSection.tsx` | `Views/Components/NotesSection.swift` |
+| `views/scanner/DocumentScanner.tsx`, `support/scan/*` | `Views/Components/CaptureViews.swift` (VisionKit's scanner) |
 | `support/images.ts` (file sorting, names) | `Support/AttachmentImport.swift`, `Views/Components/Drafts.swift` |
 | `views/assignments/AssignmentForm.tsx` | `Views/Assignments/AssignmentFormView.swift` |
 | `views/exams/ExamForm.tsx` | `Views/Exams/ExamFormView.swift` |
@@ -97,6 +98,18 @@ Web: `support/formDraft.ts`, `views/RestoredDraftBanner.tsx`, and their use in
   Reset is easiest by giving the form a new `.id(UUID())` from its parent so
   every `@State` starts over.
 
+### 3. Document scanner: match the scan's name
+
+Web: `views/scanner/DocumentScanner.tsx`, `support/scan/*`.
+
+The web app now has its own scanner, modelled on the one in Notes. iOS
+already uses that very scanner (VisionKit's `VNDocumentCameraViewController`),
+which does page detection, Auto capture, cropping and filters itself, so
+there's nothing else to port. One difference to fix: the web names a scan
+"Scan – Nov 18.pdf", and iOS names it "Scan – Nov 18". Add ".pdf" on iOS,
+numbering a repeat as "Scan – Nov 18 (2).pdf" with the number before the
+extension.
+
 ## Working on the web app
 
 - Run commands in `web/`: `npm ci`, `npm run dev`, `npm run typecheck`, and
@@ -111,4 +124,10 @@ Web: `support/formDraft.ts`, `views/RestoredDraftBanner.tsx`, and their use in
 - Text fields' placeholders contain a zero-width space so Safari doesn't
   offer AutoFill. In Playwright, find them with a regex such as
   `getByPlaceholder(/itle \(optional/)` rather than the exact text.
+- To try the scanner without a phone, give Chromium a fake camera:
+  `--use-fake-ui-for-media-stream --use-fake-device-for-media-stream
+  --use-file-for-fake-video-capture=scene.y4m`, where `scene.y4m` is a video
+  (YUV 4:2:0) of a page on a desk. Make the page with a real camera
+  projection (a tilted A4 rectangle through a pinhole camera), not by placing
+  corners by hand, or the straightened page's proportions can't be checked.
 - Comments use `///` above declarations and explain why, in plain sentences.

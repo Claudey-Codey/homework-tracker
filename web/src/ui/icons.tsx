@@ -6,6 +6,7 @@ import type { SVGProps } from "react";
 
 export {
   Bell as BellIcon,
+  Blend as FiltersIcon,
   Bold as BoldIcon,
   Camera as CameraIcon,
   Braces as CodeIcon,
@@ -14,6 +15,7 @@ export {
   ChevronRight as ChevronRightIcon,
   ChevronsUpDown as ChevronsUpDownIcon,
   CirclePlus as AddCircleIcon,
+  Crop as CropIcon,
   CircleUser as PersonCircleIcon,
   Folder as FolderIcon,
   GraduationCap as GraduationCapIcon,
@@ -36,6 +38,8 @@ export {
   FileText as PdfIcon,
   Pencil as PencilIcon,
   RotateCcw as ResetIcon,
+  RotateCw as RotateIcon,
+  ScanLine as ScanIcon,
   Plus as PlusIcon,
   Search as SearchIcon,
   Settings as GearIcon,
