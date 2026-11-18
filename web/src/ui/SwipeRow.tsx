@@ -18,11 +18,13 @@ export function SwipeRow({
   leading = [],
   trailing = [],
   onClick,
+  className = "",
   children,
 }: {
   leading?: SwipeAction[];
   trailing?: SwipeAction[];
   onClick?: () => void;
+  className?: string;
   children: ReactNode;
 }) {
   const id = useRef(Math.random());
@@ -116,7 +118,7 @@ export function SwipeRow({
   return (
     <div
       ref={rowRef}
-      className="cell swipe"
+      className={`cell swipe ${className}`}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}

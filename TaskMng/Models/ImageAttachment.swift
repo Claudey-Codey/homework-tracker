@@ -32,7 +32,8 @@ final class ImageAttachment {
 extension ModelContext {
     /// Writes a form's image drafts back: images removed in the form are
     /// deleted, new ones are inserted and handed to `attach` to link them to
-    /// their owner, and every image takes its place in the list order.
+    /// their owner, and every image takes its place in the list order and
+    /// keeps any new name it was given.
     func commitImages(_ drafts: [DraftImage],
                       replacing saved: [ImageAttachment],
                       attach: (ImageAttachment) -> Void) {
@@ -43,6 +44,7 @@ extension ModelContext {
         for (index, draft) in drafts.enumerated() {
             if let existing = draft.saved {
                 existing.order = index
+                existing.name = draft.name
                 continue
             }
             let image = ImageAttachment(data: draft.data, name: draft.name, order: index,

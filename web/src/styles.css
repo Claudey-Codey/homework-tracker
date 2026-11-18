@@ -1465,3 +1465,130 @@ button.cell {
   border-radius: 10px;
   background: #fff;
 }
+
+/* ---------- Adding and arranging attachments ---------- */
+
+.menu-divider {
+  height: 8px;
+  margin: 6px 0;
+  background: var(--fill-3);
+}
+
+.menu-item-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.menu-item-detail {
+  font-size: 13px;
+  color: var(--label-2);
+}
+
+/* The ≡ handle on an attachment row. It takes the pointer itself, so dragging
+   it reorders instead of scrolling the form or swiping the row. */
+.reorder-handle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 44px;
+  margin-right: -10px;
+  color: var(--label-3);
+  touch-action: none;
+  cursor: grab;
+}
+
+.reorder-handle:active {
+  cursor: grabbing;
+}
+
+.reorder-handle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -4px;
+  border-radius: 10px;
+}
+
+.cell.reordering {
+  z-index: 3;
+  border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+}
+
+.cell.reordering::before,
+.cell.reordering + .cell::before {
+  display: none;
+}
+
+.drop-overlay {
+  position: fixed;
+  inset: 12px;
+  z-index: 250;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 2.5px dashed var(--accent);
+  border-radius: 28px;
+  background: color-mix(in srgb, var(--accent) 12%, var(--dim));
+  color: var(--accent);
+  pointer-events: none;
+  animation: fade-in 0.15s ease both;
+}
+
+.drop-overlay > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 24px 28px;
+  border-radius: 24px;
+  background: var(--bg-cell-elevated);
+}
+
+.drop-overlay span {
+  font-size: 15px;
+  color: var(--label-2);
+}
+
+/* Rename: an alert with a text field and Cancel / Save. */
+.alert-field {
+  width: 100%;
+  margin-top: 14px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: var(--fill-3);
+  color: var(--label);
+  font-size: 17px;
+  outline: none;
+}
+
+.alert-field:focus {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.alert-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.alert .alert-buttons > button {
+  flex: 1;
+  width: auto;
+  margin: 0;
+  padding: 0 12px;
+  height: 46px;
+  border-radius: 23px;
+  font-weight: 600;
+}
+
+.alert-button {
+  background: var(--fill-3);
+  color: var(--label);
+}
+
+.alert-buttons .prominent-button:disabled {
+  opacity: 0.4;
+}

@@ -22,7 +22,8 @@ struct DraftNote: Identifiable, Equatable {
 struct DraftImage: Identifiable {
     let id = UUID()
     let data: Data
-    let name: String
+    /// Can be changed in the form with Rename.
+    var name: String
     let isPDF: Bool
     /// The saved attachment this draft stands for; nil for a newly picked one.
     let saved: ImageAttachment?

@@ -7,12 +7,15 @@ import type { SVGProps } from "react";
 export {
   Bell as BellIcon,
   Bold as BoldIcon,
+  Camera as CameraIcon,
   Braces as CodeIcon,
   Check as CheckIcon,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
   ChevronsUpDown as ChevronsUpDownIcon,
+  CirclePlus as AddCircleIcon,
   CircleUser as PersonCircleIcon,
+  Folder as FolderIcon,
   GraduationCap as GraduationCapIcon,
   Heading1 as TitleIcon,
   Heading2 as HeadingIcon,
@@ -27,9 +30,11 @@ export {
   ListChecks as ChecklistIcon,
   ListOrdered as NumberedListIcon,
   Lock as LockIcon,
+  Menu as ReorderIcon,
   Moon as MoonIcon,
   NotebookText as NoteIcon,
   FileText as PdfIcon,
+  Pencil as PencilIcon,
   Plus as PlusIcon,
   Search as SearchIcon,
   Settings as GearIcon,
@@ -41,6 +46,7 @@ export {
   Trash2 as TrashIcon,
   Type as TextFormatIcon,
   Undo2 as UndoIcon,
+  Upload as UploadIcon,
 } from "lucide-react";
 
 type IconProps = SVGProps<SVGSVGElement> & { size?: number };

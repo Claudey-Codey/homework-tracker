@@ -29,3 +29,6 @@ targets:
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait"
+        # Shown when the app first asks for the camera (Scan Document, Take Photo).
+        # Without it, iOS stops the app as soon as the camera opens.
+        INFOPLIST_KEY_NSCameraUsageDescription: "Scan worksheets and take photos to attach to assignments and exams."

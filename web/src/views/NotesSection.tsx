@@ -1,13 +1,45 @@
-import { lazy, Suspense, useState, type Dispatch, type SetStateAction } from "react";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type Dispatch,
+  type ReactNode,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+  type SetStateAction,
+} from "react";
+import { createPortal } from "react-dom";
 import { isPdf, type StudyNote } from "../db";
-import { pickTextFile, readTextFile } from "../support/files";
 import { newId } from "../support/id";
-import { draftFromFile, pickImageFiles, pickPdfFiles, useImageURL, type DraftImage } from "../support/images";
+import {
+  attachableTypes,
+  imageTypes,
+  pickFiles,
+  sortFiles,
+  useImageURL,
+  type DraftImage,
+  type FileSource,
+} from "../support/images";
 import { notePreview, noteTitle } from "../support/noteText";
-import { Alert } from "../ui/Alert";
+import { Alert, Prompt } from "../ui/Alert";
 import { GlassButton } from "../ui/GlassButton";
-import { ComposeIcon, ImportIcon, PdfIcon, PhotoIcon, ShareIcon, TrashIcon } from "../ui/icons";
-import { ButtonRow, Section } from "../ui/List";
+import {
+  AddCircleIcon,
+  CameraIcon,
+  ComposeIcon,
+  FolderIcon,
+  PdfIcon,
+  PencilIcon,
+  PhotoIcon,
+  ReorderIcon,
+  ShareIcon,
+  TrashIcon,
+  UploadIcon,
+} from "../ui/icons";
+import { Section } from "../ui/List";
 import { Sheet, SheetBody, SheetNav, useDismiss } from "../ui/Sheet";
 import { SwipeRow } from "../ui/SwipeRow";
 
@@ -25,6 +57,14 @@ export interface DraftNote {
 }
 
 const isBlank = (text: string) => text.trim() === "";
+
+/// Phones get the camera and photo library in the Add menu; with a mouse
+/// those are just a file picker, so it offers "Choose File…" alone.
+const isTouch = () => window.matchMedia?.("(pointer: coarse)").matches ?? false;
+
+/// Pastes and drops into a text field or the note editor belong to that field.
+const isEditable = (target: EventTarget | null) =>
+  target instanceof HTMLElement && !!target.closest("input, textarea, [contenteditable='true']");
 
 /// Turns a form's drafts into notes ready to store: blanks dropped, text
 /// trimmed, and `updatedAt` only moved for notes whose text actually changed.
@@ -45,9 +85,10 @@ export function finalizeNotes(drafts: DraftNote[], saved: StudyNote[] = []): Stu
     });
 }
 
-/// Markdown notes and attached images and PDFs, with Add and Import buttons —
-/// the exam's study material and an assignment's content. Tapping a note
-/// opens the editor; tapping an image or PDF shows it full size.
+/// Markdown notes and attached images and PDFs — the exam's study material and
+/// an assignment's content. One "Add…" row opens a menu for every source, and
+/// files can also be dropped onto the page or pasted. Tapping a note opens the
+/// editor; tapping an image or PDF shows it full size.
 export function NotesSection({
   header,
   emptyFooter,
@@ -66,17 +107,83 @@ export function NotesSection({
 }) {
   const [editingNote, setEditingNote] = useState<string | null>(null);
   const [viewingImage, setViewingImage] = useState<DraftImage | null>(null);
+  const [renaming, setRenaming] = useState<DraftImage | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const [menuAnchor, setMenuAnchor] = useState<DOMRect | null>(null);
+  const [dragging, setDragging] = useState<string | null>(null);
+  const [dropping, setDropping] = useState(false);
+  const addRow = useRef<HTMLButtonElement>(null);
+  const grips = useRef(new Map<string, HTMLElement>());
 
-  const addImages = () =>
-    pickImageFiles((files) =>
-      onImagesChange((current) => [...current, ...files.map((file) => draftFromFile(file, "image"))]),
-    );
+  // Read from window listeners, which outlive the render they were set up in.
+  const latest = useRef({ images, busy: false });
+  latest.current = { images, busy: editingNote !== null || viewingImage !== null || renaming !== null };
 
-  const addPdfs = () =>
-    pickPdfFiles((files) =>
-      onImagesChange((current) => [...current, ...files.map((file) => draftFromFile(file, "pdf"))]),
-    );
+  /// Every way of adding files ends here: they're sorted into images, PDFs
+  /// and notes, and anything that couldn't be added is listed in one alert.
+  const addFiles = async (files: File[], source: FileSource) => {
+    const taken = latest.current.images.map((image) => image.name);
+    const sorted = await sortFiles(files, source, taken);
+    if (sorted.images.length > 0) onImagesChange((current) => [...current, ...sorted.images]);
+    if (sorted.notes.length > 0) {
+      const now = Date.now();
+      onChange((current) => [...current, ...sorted.notes.map((text) => ({ id: newId(), text, createdAt: now }))]);
+    }
+    if (sorted.skipped.length > 0) setImportError(sorted.skipped.join("\n"));
+  };
+  const addFilesRef = useRef(addFiles);
+  addFilesRef.current = addFiles;
+
+  // Drop files anywhere on the form, or paste a screenshot.
+  useEffect(() => {
+    let depth = 0;
+    const hasFiles = (event: DragEvent) => Array.from(event.dataTransfer?.types ?? []).includes("Files");
+    const accepts = (event: DragEvent) => hasFiles(event) && !latest.current.busy && !isEditable(event.target);
+
+    const onDragEnter = (event: DragEvent) => {
+      if (!hasFiles(event) || latest.current.busy) return;
+      depth++;
+      setDropping(true);
+    };
+    const onDragOver = (event: DragEvent) => {
+      if (!accepts(event)) return;
+      event.preventDefault();
+      if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+    };
+    const onDragLeave = (event: DragEvent) => {
+      if (!hasFiles(event)) return;
+      depth = Math.max(0, depth - 1);
+      if (depth === 0) setDropping(false);
+    };
+    const onDrop = (event: DragEvent) => {
+      depth = 0;
+      setDropping(false);
+      if (!accepts(event)) return;
+      event.preventDefault();
+      const files = Array.from(event.dataTransfer?.files ?? []);
+      if (files.length > 0) void addFilesRef.current(files, "files");
+    };
+    const onPaste = (event: ClipboardEvent) => {
+      if (latest.current.busy || isEditable(event.target)) return;
+      const files = Array.from(event.clipboardData?.files ?? []);
+      if (files.length === 0) return;
+      event.preventDefault();
+      void addFilesRef.current(files, "paste");
+    };
+
+    window.addEventListener("dragenter", onDragEnter);
+    window.addEventListener("dragover", onDragOver);
+    window.addEventListener("dragleave", onDragLeave);
+    window.addEventListener("drop", onDrop);
+    window.addEventListener("paste", onPaste);
+    return () => {
+      window.removeEventListener("dragenter", onDragEnter);
+      window.removeEventListener("dragover", onDragOver);
+      window.removeEventListener("dragleave", onDragLeave);
+      window.removeEventListener("drop", onDrop);
+      window.removeEventListener("paste", onPaste);
+    };
+  }, []);
 
   const addNote = () => {
     const note: DraftNote = { id: newId(), text: "", createdAt: Date.now() };
@@ -84,43 +191,103 @@ export function NotesSection({
     setEditingNote(note.id);
   };
 
-  /// Importing straight into a new note, so you don't have to create an
-  /// empty one first.
-  const importNote = () =>
-    pickTextFile(async (file) => {
-      try {
-        const contents = await readTextFile(file);
-        if (isBlank(contents)) {
-          setImportError("That file is empty.");
-          return;
-        }
-        // Fall back to the filename as a heading if the file has no title.
-        const hasHeading = contents.trim().startsWith("#");
-        const name = file.name.replace(/\.[^.]+$/, "");
-        const text = hasHeading ? contents : `# ${name}\n\n${contents}`;
-        onChange((current) => [...current, { id: newId(), text, createdAt: Date.now() }]);
-      } catch {
-        setImportError("That file couldn't be read as text.");
-      }
-    });
-
   /// Closing the editor on an untouched note discards it, so tapping
-  /// "Add Note" and backing out doesn't leave an empty row behind.
+  /// "New Note" and backing out doesn't leave an empty row behind.
   const closeEditor = () => {
     setEditingNote(null);
     onChange((current) => current.filter((note) => !isBlank(note.text)));
   };
 
+  const move = (id: string, to: number) => {
+    const current = latest.current.images;
+    const from = current.findIndex((image) => image.id === id);
+    const target = Math.max(0, Math.min(current.length - 1, to));
+    if (from < 0 || from === target) return;
+    const next = [...current];
+    const [item] = next.splice(from, 1);
+    next.splice(target, 0, item);
+    latest.current.images = next;
+    onImagesChange(next);
+  };
+
+  /// Drag the ≡ handle up or down. The row follows the pointer one slot at a
+  /// time, as soon as the pointer passes the middle of its neighbour.
+  const startReorder = (id: string, event: ReactPointerEvent) => {
+    if (event.button !== 0) return;
+    // Keep the row's own swipe gesture from starting.
+    event.stopPropagation();
+    event.preventDefault();
+    setDragging(id);
+
+    // The new slot is the number of other rows whose middle is above the
+    // pointer. It doesn't depend on where the dragged row currently sits, so
+    // a move that hasn't reached the screen yet can't make it jump back.
+    const onMove = (e: PointerEvent) => {
+      let to = 0;
+      for (const image of latest.current.images) {
+        const row = image.id === id ? null : grips.current.get(image.id)?.closest(".cell");
+        if (!row) continue;
+        const rect = row.getBoundingClientRect();
+        if (rect.top + rect.height / 2 < e.clientY) to++;
+      }
+      move(id, to);
+    };
+    const onEnd = () => {
+      setDragging(null);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onEnd);
+      window.removeEventListener("pointercancel", onEnd);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onEnd);
+    window.addEventListener("pointercancel", onEnd);
+  };
+
+  /// The handle is a button, so the arrow keys reorder too.
+  const reorderWithKeys = (id: string, event: ReactKeyboardEvent) => {
+    if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+    event.preventDefault();
+    const index = latest.current.images.findIndex((image) => image.id === id);
+    move(id, index + (event.key === "ArrowUp" ? -1 : 1));
+    requestAnimationFrame(() => grips.current.get(id)?.focus());
+  };
+
+  const touch = isTouch();
+  const menuItems: MenuEntry[] = [
+    { label: "New Note", icon: <ComposeIcon size={20} />, onSelect: addNote },
+    "divider",
+    ...(touch
+      ? ([
+          {
+            label: "Take Photo",
+            icon: <CameraIcon size={20} />,
+            onSelect: () => pickFiles({ accept: imageTypes, multiple: false, capture: true }, (f) => addFiles(f, "camera")),
+          },
+          {
+            label: "Photo Library",
+            icon: <PhotoIcon size={20} />,
+            onSelect: () => pickFiles({ accept: imageTypes }, (f) => addFiles(f, "library")),
+          },
+        ] satisfies MenuEntry[])
+      : []),
+    {
+      label: "Choose File…",
+      detail: "Images, PDFs, or .md and .txt notes",
+      icon: <FolderIcon size={20} />,
+      onSelect: () => pickFiles({ accept: attachableTypes }, (f) => addFiles(f, "files")),
+    },
+  ];
+
+  const empty = notes.length === 0 && images.length === 0;
+  const footer = empty
+    ? emptyFooter
+    : images.length > 1
+      ? "Tap to open. Swipe to rename or delete, drag ≡ to reorder."
+      : "Tap to open. Swipe to rename or delete.";
+
   return (
     <>
-      <Section
-        header={header}
-        footer={
-          notes.length === 0 && images.length === 0
-            ? emptyFooter
-            : "Tap a note, image or PDF to open it, swipe to delete."
-        }
-      >
+      <Section header={header} footer={touch ? footer : `${footer} You can also drop or paste files here.`}>
         {notes.map((note) => (
           <SwipeRow
             key={note.id}
@@ -145,6 +312,7 @@ export function NotesSection({
         {images.map((image) => (
           <SwipeRow
             key={image.id}
+            className={dragging === image.id ? "reordering" : ""}
             onClick={() => setViewingImage(image)}
             trailing={[
               {
@@ -153,17 +321,62 @@ export function NotesSection({
                 color: "var(--red)",
                 onAction: () => onImagesChange((current) => current.filter((i) => i.id !== image.id)),
               },
+              {
+                label: "Rename",
+                icon: <PencilIcon size={20} />,
+                color: "var(--orange)",
+                onAction: () => setRenaming(image),
+              },
             ]}
           >
             {isPdf(image) ? <PdfThumbnail /> : <ImageThumbnail image={image} />}
-            <span className="line-clamp-1" dir="auto" style={{ minWidth: 0 }}>{image.name}</span>
+            <span className="line-clamp-1" dir="auto" style={{ minWidth: 0, flex: 1 }}>{image.name}</span>
+            {images.length > 1 && (
+              <button
+                type="button"
+                className="reorder-handle"
+                aria-label={`Move ${image.name}. Use the up and down arrow keys.`}
+                ref={(el) => {
+                  if (el) grips.current.set(image.id, el);
+                  else grips.current.delete(image.id);
+                }}
+                onPointerDown={(event) => startReorder(image.id, event)}
+                onKeyDown={(event) => reorderWithKeys(image.id, event)}
+                onClick={(event) => event.stopPropagation()}
+              >
+                <ReorderIcon size={20} />
+              </button>
+            )}
           </SwipeRow>
         ))}
-        <ButtonRow icon={<ComposeIcon size={20} />} label="Add Note" onClick={addNote} />
-        <ButtonRow icon={<PhotoIcon size={20} />} label="Add Image…" onClick={addImages} />
-        <ButtonRow icon={<PdfIcon size={20} />} label="Add PDF…" onClick={addPdfs} />
-        <ButtonRow icon={<ImportIcon size={20} />} label="Import .md File…" onClick={importNote} />
+        <button
+          ref={addRow}
+          type="button"
+          className="cell tappable accent"
+          aria-haspopup="menu"
+          aria-expanded={menuAnchor !== null}
+          onClick={() => setMenuAnchor(addRow.current?.getBoundingClientRect() ?? null)}
+        >
+          <span style={{ display: "flex" }}>
+            <AddCircleIcon size={20} />
+          </span>
+          <span className="cell-label">Add…</span>
+        </button>
       </Section>
+
+      <AnchoredMenu anchor={menuAnchor} items={menuItems} onClose={() => setMenuAnchor(null)} />
+
+      {dropping &&
+        createPortal(
+          <div className="drop-overlay" aria-hidden="true">
+            <div>
+              <UploadIcon size={40} />
+              <strong>Drop to attach</strong>
+              <span>Images and PDFs are attached. .md and .txt files become notes.</span>
+            </div>
+          </div>,
+          document.body,
+        )}
 
       <Sheet item={viewingImage} onClose={() => setViewingImage(null)} plain>
         {(image) => (isPdf(image) ? <PdfViewer pdf={image} /> : <ImageViewer image={image} />)}
@@ -182,8 +395,91 @@ export function NotesSection({
         )}
       </Sheet>
 
-      <Alert title="Couldn't Import File" message={importError} onClose={() => setImportError(null)} />
+      <Prompt
+        title="Rename"
+        initialValue={renaming?.name ?? null}
+        onClose={() => setRenaming(null)}
+        onSave={(name) =>
+          onImagesChange((current) => current.map((image) => (image.id === renaming?.id ? { ...image, name } : image)))
+        }
+      />
+
+      <Alert title="Couldn’t Add Everything" message={importError} onClose={() => setImportError(null)} />
     </>
+  );
+}
+
+type MenuEntry =
+  | "divider"
+  | { label: string; detail?: string; icon: ReactNode; onSelect: () => void };
+
+/// A `Menu` that opens from a list row rather than a toolbar button: below the
+/// row when it fits, above it when the row is near the bottom of the screen.
+function AnchoredMenu({
+  anchor,
+  items,
+  onClose,
+}: {
+  anchor: DOMRect | null;
+  items: MenuEntry[];
+  onClose: () => void;
+}) {
+  const menu = useRef<HTMLDivElement>(null);
+  const [style, setStyle] = useState<CSSProperties>({ visibility: "hidden" });
+
+  useEffect(() => {
+    if (!anchor || !menu.current) return;
+    const height = menu.current.offsetHeight;
+    const left = Math.min(anchor.left + 16, window.innerWidth - menu.current.offsetWidth - 12);
+    const below = anchor.bottom + 6;
+    const fitsBelow = below + height < window.innerHeight - 16;
+    setStyle({
+      position: "fixed",
+      left: Math.max(12, left),
+      top: fitsBelow ? below : Math.max(12, anchor.top - height - 6),
+      transformOrigin: fitsBelow ? "top left" : "bottom left",
+    });
+    menu.current.querySelector("button")?.focus({ preventScroll: true });
+  }, [anchor]);
+
+  if (!anchor) return null;
+  return createPortal(
+    <>
+      <div className="menu-scrim" onClick={onClose} />
+      <div
+        ref={menu}
+        className="menu glass"
+        role="menu"
+        style={style}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") onClose();
+        }}
+      >
+        {items.map((item, index) =>
+          item === "divider" ? (
+            <div key={`divider-${index}`} className="menu-divider" role="separator" />
+          ) : (
+            <button
+              key={item.label}
+              type="button"
+              role="menuitem"
+              className="menu-item"
+              onClick={() => {
+                onClose();
+                item.onSelect();
+              }}
+            >
+              <span className="menu-item-text">
+                <span>{item.label}</span>
+                {item.detail && <span className="menu-item-detail">{item.detail}</span>}
+              </span>
+              {item.icon}
+            </button>
+          ),
+        )}
+      </div>
+    </>,
+    document.body,
   );
 }
 

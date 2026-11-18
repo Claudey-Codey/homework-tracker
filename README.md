@@ -10,7 +10,7 @@ A native SwiftUI + SwiftData iOS app to track assignments, homework, and exams.
 - **Assignments** dashboard — all homework + projects, grouped Overdue / This Week / Later, sortable, searchable.
 - **Homework** dashboard — homework only.
 - **Exams** dashboard — each exam has a date, subject, and study-material notes.
-- **Attachments** — add images and PDFs to an assignment's content or an exam's study material; tap one to view it, share it to open in Books or save to Files.
+- **Attachments** — one **Add…** menu for an assignment's content or an exam's study material: write a note, scan a worksheet into a PDF, take a photo, pick from Photos, or choose files (images and PDFs are attached, `.md`/`.txt` files become notes). Swipe to rename or delete, touch and hold to reorder; tap one to view it, share it to open in Books or save to Files.
 - **Subjects** — add the subjects you're taking, give each a color, toggle them on/off.
 - **+ to add** everywhere, with due date, type (homework/project), and subject pickers.
 - **Reminders** — optional local notifications before a due date or exam.
@@ -38,6 +38,7 @@ A native SwiftUI + SwiftData iOS app to track assignments, homework, and exams.
 5. **Drag the `TaskMng/` source folders** from this project (Models, Views, Support, `TaskMngApp.swift`) into the Xcode project navigator. When prompted, check **"Copy items if needed"** and **"Create groups"**, and make sure the **TaskMng target** is checked.
 6. If Xcode's template also generated its own `TaskMngApp.swift`, keep only one `@main` (delete the template's, keep the one from this repo).
 7. Set the deployment target to **iOS 17.0** (project ▸ target ▸ General ▸ Minimum Deployments).
+8. Let the app use the camera (for scanning and photos): project ▸ target ▸ **Info** ▸ hover any row ▸ **+** ▸ choose **Privacy - Camera Usage Description**, and set it to *Scan worksheets and take photos to attach to assignments and exams.* Without it the app closes when you tap Scan Document or Take Photo.
 
 **Option B — generate the project with XcodeGen (one command):**
 ```bash

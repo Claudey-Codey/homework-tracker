@@ -2,11 +2,14 @@ import PDFKit
 import PhotosUI
 import SwiftUI
 import UniformTypeIdentifiers
+import VisionKit
 
-/// Markdown notes and attached images and PDFs, with Add and Import buttons —
-/// the exam's study material and an assignment's content. Tapping a note opens
-/// the editor; tapping an image or PDF shows it full size. Everything is held as drafts
-/// by the owning form and only committed on Save.
+/// Markdown notes and attached images and PDFs — the exam's study material and
+/// an assignment's content. One "Add…" row opens a menu for every source:
+/// a new note, the document scanner, the camera, the photo library, Files, or
+/// an image on the clipboard. Tapping a note opens the editor; tapping an
+/// image or PDF shows it full size. Everything is held as drafts by the
+/// owning form and only committed on Save.
 struct NotesSection: View {
     let header: String
     /// Shown under the section while it has nothing in it yet.
@@ -15,12 +18,17 @@ struct NotesSection: View {
     @Binding var images: [DraftImage]
 
     @State private var editingNote: DraftNote?
-    @State private var importingNote = false
     @State private var viewingImage: DraftImage?
     @State private var photoSelection: [PhotosPickerItem] = []
-    @State private var importingImages = false
-    @State private var importingPDFs = false
+    @State private var choosingPhotos = false
+    @State private var choosingFiles = false
+    @State private var scanning = false
+    @State private var takingPhoto = false
+    @State private var renaming: DraftImage?
+    @State private var newName = ""
     @State private var importError: String?
+    /// An error from the scanner, shown once its full-screen cover has gone.
+    @State private var pendingError: String?
 
     var body: some View {
         Section {
@@ -50,85 +58,158 @@ struct NotesSection: View {
                             .lineLimit(1)
                     }
                 }
+                .swipeActions(edge: .trailing) {
+                    Button(role: .destructive) {
+                        withAnimation { images.removeAll { $0.id == image.id } }
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                    Button {
+                        newName = image.name
+                        renaming = image
+                    } label: {
+                        Label("Rename", systemImage: "pencil")
+                    }
+                    .tint(.orange)
+                }
             }
-            .onDelete { images.remove(atOffsets: $0) }
+            // Touch and hold a row, then drag it.
+            .onMove { images.move(fromOffsets: $0, toOffset: $1) }
 
+            addMenu
+                // Presentations hang off this one always-present row: modifiers
+                // on a Section are handed to every row in it, which would
+                // stack one sheet per note.
+                //
+                // Closing the editor on an untouched note discards it, so
+                // tapping "New Note" and backing out doesn't leave an empty
+                // row behind.
+                .sheet(item: $editingNote, onDismiss: discardEmptyNotes) { note in
+                    StudyNoteEditorView(text: binding(for: note))
+                }
+                .sheet(item: $viewingImage) { image in
+                    if image.isPDF {
+                        PDFViewer(pdf: image)
+                    } else {
+                        ImageViewer(image: image)
+                    }
+                }
+                .photosPicker(isPresented: $choosingPhotos, selection: $photoSelection, matching: .images)
+                .onChange(of: photoSelection) { _, items in addPhotos(items) }
+                .fileImporter(isPresented: $choosingFiles,
+                              allowedContentTypes: [.image, .pdf, .markdownText, .plainText, .text],
+                              allowsMultipleSelection: true) { result in
+                    chooseFiles(result)
+                }
+                .fullScreenCover(isPresented: $scanning, onDismiss: showPendingError) {
+                    DocumentScannerView { pages in
+                        scanning = false
+                        addScan(pages)
+                    } onFail: { error in
+                        pendingError = error.localizedDescription
+                        scanning = false
+                    } onCancel: {
+                        scanning = false
+                    }
+                    .ignoresSafeArea()
+                }
+                .fullScreenCover(isPresented: $takingPhoto) {
+                    CameraPicker { photo in
+                        takingPhoto = false
+                        if let data = photo?.jpegData(compressionQuality: 0.85) {
+                            addImage(data, named: AttachmentImport.datedName("Photo"))
+                        }
+                    }
+                    .ignoresSafeArea()
+                }
+                .alert("Rename", isPresented: Binding(get: { renaming != nil },
+                                                      set: { if !$0 { renaming = nil } })) {
+                    TextField("Name", text: $newName)
+                    Button("Cancel", role: .cancel) { renaming = nil }
+                    Button("Save") { applyRename() }
+                        .disabled(newName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+                .alert("Couldn’t Add Everything",
+                       isPresented: Binding(get: { importError != nil },
+                                            set: { if !$0 { importError = nil } })) {
+                    Button("OK", role: .cancel) { importError = nil }
+                } message: {
+                    Text(importError ?? "")
+                }
+        } header: {
+            Text(header)
+        } footer: {
+            if notes.isEmpty && images.isEmpty {
+                Text(emptyFooter)
+            } else if images.count > 1 {
+                Text("Tap to open. Swipe to rename or delete, touch and hold a file to move it.")
+            } else {
+                Text("Tap to open. Swipe to rename or delete.")
+            }
+        }
+    }
+
+    /// The one Add row. The menu keeps its order even when it opens upward
+    /// from the bottom of the screen.
+    private var addMenu: some View {
+        Menu {
             Button {
                 let note = DraftNote(text: "")
                 notes.append(note)
                 editingNote = note
             } label: {
-                Label("Add Note", systemImage: "square.and.pencil")
-            }
-            // Presentations hang off this one always-present row: modifiers on
-            // a Section are handed to every row in it, which would stack one
-            // sheet per note.
-            //
-            // Closing the editor on an untouched note discards it, so tapping
-            // "Add Note" and backing out doesn't leave an empty row behind.
-            .sheet(item: $editingNote, onDismiss: discardEmptyNotes) { note in
-                StudyNoteEditorView(text: binding(for: note))
-            }
-            // Importing straight into a new note, so you don't have to create
-            // an empty one first.
-            .fileImporter(isPresented: $importingNote,
-                          allowedContentTypes: [.markdownText, .plainText, .text]) { result in
-                importNote(result)
-            }
-            .alert("Couldn't Import File",
-                   isPresented: Binding(get: { importError != nil },
-                                        set: { if !$0 { importError = nil } })) {
-                Button("OK", role: .cancel) { importError = nil }
-            } message: {
-                Text(importError ?? "")
+                Label("New Note", systemImage: "square.and.pencil")
             }
 
-            PhotosPicker(selection: $photoSelection, matching: .images) {
-                Label("Add Photo", systemImage: "photo.on.rectangle")
-            }
-            .onChange(of: photoSelection) { _, items in addPhotos(items) }
-            .sheet(item: $viewingImage) { image in
-                if image.isPDF {
-                    PDFViewer(pdf: image)
-                } else {
-                    ImageViewer(image: image)
+            Section {
+                if VNDocumentCameraViewController.isSupported {
+                    Button { scanning = true } label: {
+                        Label {
+                            Text("Scan Document")
+                            Text("Saves as one PDF")
+                        } icon: {
+                            Image(systemName: "doc.viewfinder")
+                        }
+                    }
+                }
+                if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                    Button { takingPhoto = true } label: {
+                        Label("Take Photo", systemImage: "camera")
+                    }
+                }
+                Button { choosingPhotos = true } label: {
+                    Label("Photo Library", systemImage: "photo.on.rectangle")
                 }
             }
 
-            Button {
-                importingImages = true
-            } label: {
-                Label("Add Image from Files…", systemImage: "photo.badge.plus")
+            Section {
+                Button { choosingFiles = true } label: {
+                    Label {
+                        Text("Choose File…")
+                        Text("Images, PDFs, or .md and .txt notes")
+                    } icon: {
+                        Image(systemName: "folder")
+                    }
+                }
+                // Checking for an image doesn't read the clipboard, so this
+                // doesn't trigger the paste permission prompt.
+                if UIPasteboard.general.hasImages {
+                    Button(action: pasteImages) {
+                        Label("Paste Image", systemImage: "doc.on.clipboard")
+                    }
+                }
             }
-            .fileImporter(isPresented: $importingImages,
-                          allowedContentTypes: [.png, .image],
-                          allowsMultipleSelection: true) { result in
-                importImages(result)
-            }
-
-            Button {
-                importingPDFs = true
-            } label: {
-                Label("Add PDF…", systemImage: "doc.richtext")
-            }
-            .fileImporter(isPresented: $importingPDFs,
-                          allowedContentTypes: [.pdf],
-                          allowsMultipleSelection: true) { result in
-                importPDFs(result)
-            }
-
-            Button {
-                importingNote = true
-            } label: {
-                Label("Import .md File…", systemImage: "square.and.arrow.down")
-            }
-        } header: {
-            Text(header)
-        } footer: {
-            Text(notes.isEmpty && images.isEmpty
-                 ? emptyFooter
-                 : "Tap a note, image or PDF to open it, swipe to delete.")
+        } label: {
+            Label("Add…", systemImage: "plus.circle.fill")
         }
+        .menuOrder(.fixed)
+    }
+
+    /// Adds an image or PDF under `name`, numbered if that name is already in
+    /// the list.
+    private func addImage(_ data: Data, named name: String, isPDF: Bool = false) {
+        let unique = AttachmentImport.uniqueName(name, taken: images.map(\.name))
+        withAnimation { images.append(DraftImage(data: data, name: unique, isPDF: isPDF)) }
     }
 
     /// Photos come out of the picker as they were taken (HEIC, JPEG or PNG)
@@ -140,80 +221,61 @@ struct NotesSection: View {
         Task {
             for item in items {
                 guard let data = try? await item.loadTransferable(type: Data.self) else { continue }
-                withAnimation { images.append(DraftImage(data: data, name: "Photo")) }
+                addImage(data, named: AttachmentImport.datedName("Photo"))
             }
         }
     }
 
-    private func importImages(_ result: Result<[URL], Error>) {
-        do {
-            var unreadable = 0
-            for url in try result.get() {
-                let scoped = url.startAccessingSecurityScopedResource()
-                defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+    private func addScan(_ pages: [UIImage]) {
+        guard !pages.isEmpty else { return }
+        guard let pdf = AttachmentImport.scanPDF(pages) else {
+            pendingError = "The scan couldn’t be saved as a PDF."
+            return
+        }
+        addImage(pdf, named: AttachmentImport.datedName("Scan"), isPDF: true)
+    }
 
-                let data = try Data(contentsOf: url)
-                let image = DraftImage(data: data, name: url.lastPathComponent)
-                guard image.thumbnail != nil else {
-                    unreadable += 1
-                    continue
-                }
-                withAnimation { images.append(image) }
+    private func pasteImages() {
+        let pasted = (UIPasteboard.general.images ?? []).compactMap { $0.pngData() }
+        guard !pasted.isEmpty else {
+            importError = "There’s no image on the clipboard."
+            return
+        }
+        for data in pasted {
+            addImage(data, named: AttachmentImport.datedName("Pasted Image"))
+        }
+    }
+
+    /// Files from "Choose File…": images and PDFs are attached, Markdown and
+    /// plain text become notes, and anything else is listed in one alert.
+    private func chooseFiles(_ result: Result<[URL], Error>) {
+        do {
+            let loaded = AttachmentImport.load(try result.get(), taken: images.map(\.name))
+            withAnimation {
+                images.append(contentsOf: loaded.images)
+                notes.append(contentsOf: loaded.notes)
             }
-            if unreadable > 0 {
-                importError = unreadable == 1
-                    ? "That file isn't an image this iPhone can open."
-                    : "\(unreadable) files aren't images this iPhone can open."
+            if !loaded.failures.isEmpty {
+                importError = loaded.failures.joined(separator: "\n")
             }
         } catch {
             importError = error.localizedDescription
         }
     }
 
-    private func importPDFs(_ result: Result<[URL], Error>) {
-        do {
-            var unreadable = 0
-            for url in try result.get() {
-                let scoped = url.startAccessingSecurityScopedResource()
-                defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-
-                let data = try Data(contentsOf: url)
-                guard PDFDocument(data: data) != nil else {
-                    unreadable += 1
-                    continue
-                }
-                let pdf = DraftImage(data: data, name: url.lastPathComponent, isPDF: true)
-                withAnimation { images.append(pdf) }
-            }
-            if unreadable > 0 {
-                importError = unreadable == 1
-                    ? "That file isn't a PDF this iPhone can open."
-                    : "\(unreadable) files aren't PDFs this iPhone can open."
-            }
-        } catch {
-            importError = error.localizedDescription
-        }
+    private func applyRename() {
+        let name = newName.trimmingCharacters(in: .whitespacesAndNewlines)
+        defer { renaming = nil }
+        guard !name.isEmpty,
+              let id = renaming?.id,
+              let index = images.firstIndex(where: { $0.id == id }) else { return }
+        images[index].name = name
     }
 
-    private func importNote(_ result: Result<URL, Error>) {
-        do {
-            let url = try result.get()
-            let scoped = url.startAccessingSecurityScopedResource()
-            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-
-            let contents = try String(contentsOf: url, encoding: .utf8)
-            guard !contents.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-                importError = "That file is empty."
-                return
-            }
-            // Fall back to the filename as a heading if the file has no title.
-            let hasHeading = contents.trimmingCharacters(in: .whitespacesAndNewlines)
-                .hasPrefix("#")
-            let name = url.deletingPathExtension().lastPathComponent
-            let text = hasHeading ? contents : "# \(name)\n\n\(contents)"
-            withAnimation { notes.append(DraftNote(text: text)) }
-        } catch {
-            importError = error.localizedDescription
+    private func showPendingError() {
+        if let pendingError {
+            importError = pendingError
+            self.pendingError = nil
         }
     }
 
