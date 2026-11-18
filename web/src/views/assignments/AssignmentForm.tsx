@@ -3,6 +3,7 @@ import { flushSync } from "react-dom";
 import { db, type Assignment, type ChecklistItem, type Reminder } from "../../db";
 import { defaultDueDate, endOfDay } from "../../support/dates";
 import { newId } from "../../support/id";
+import { useKeepDraft, useRestoredDraft } from "../../support/formDraft";
 import { commitImages, type DraftImage } from "../../support/images";
 import { CheckBox } from "../../ui/CheckBox";
 import { GlassButton } from "../../ui/GlassButton";
@@ -14,30 +15,82 @@ import { SwipeRow } from "../../ui/SwipeRow";
 import { ToggleRow } from "../../ui/Toggle";
 import { finalizeNotes, NotesSection, type DraftNote } from "../NotesSection";
 import { ReminderSection } from "../ReminderEditor";
+import { RestoredDraftBanner } from "../RestoredDraftBanner";
 import { subjectOptions, useSubjects } from "../useSubjects";
 import { TextField } from "../../ui/TextField";
 
 const isBlank = (text: string) => text.trim() === "";
 
+/// Everything a new assignment's form holds, kept for a few seconds after it
+/// closes unsaved (see `formDraft.ts`).
+type AssignmentDraft = {
+  title: string;
+  dueDate: Date;
+  hasTime: boolean;
+  subjectId: string;
+  reminders: Reminder[];
+  checklist: ChecklistItem[];
+  newStep: string;
+  notes: DraftNote[];
+  images: DraftImage[];
+};
+
+const draftKey = "new-assignment";
+
 /// Add or edit an assignment. Presented as a sheet.
 ///
 /// Everything is held as drafts in local state and only written on Save, so
-/// Cancel really cancels.
+/// Cancel really cancels. Reset starts a restored new assignment over by
+/// mounting a fresh form.
 export function AssignmentForm({ assignment }: { assignment?: Assignment }) {
+  const [generation, setGeneration] = useState(0);
+  return (
+    <AssignmentFormBody
+      key={generation}
+      assignment={assignment}
+      onReset={() => setGeneration((n) => n + 1)}
+    />
+  );
+}
+
+function AssignmentFormBody({ assignment, onReset }: { assignment?: Assignment; onReset: () => void }) {
   const dismiss = useDismiss();
   const subjects = useSubjects();
+  const draft = useRestoredDraft<AssignmentDraft>(draftKey, !assignment);
 
-  const [title, setTitle] = useState(assignment?.title ?? "");
-  const [dueDate, setDueDate] = useState(() =>
-    assignment ? new Date(assignment.dueDate) : defaultDueDate(),
+  const [title, setTitle] = useState(draft?.title ?? assignment?.title ?? "");
+  const [dueDate, setDueDate] = useState(
+    () => draft?.dueDate ?? (assignment ? new Date(assignment.dueDate) : defaultDueDate()),
   );
-  const [hasTime, setHasTime] = useState(assignment?.hasTime ?? false);
-  const [subjectId, setSubjectId] = useState(assignment?.subjectId ?? "");
-  const [reminders, setReminders] = useState<Reminder[]>(assignment?.reminders ?? []);
-  const [checklist, setChecklist] = useState<ChecklistItem[]>(assignment?.checklist ?? []);
-  const [newStep, setNewStep] = useState("");
-  const [notes, setNotes] = useState<DraftNote[]>(assignment?.notes ?? []);
-  const [images, setImages] = useState<DraftImage[]>(assignment?.images ?? []);
+  const [hasTime, setHasTime] = useState(draft?.hasTime ?? assignment?.hasTime ?? false);
+  const [subjectId, setSubjectId] = useState(draft?.subjectId ?? assignment?.subjectId ?? "");
+  const [reminders, setReminders] = useState<Reminder[]>(draft?.reminders ?? assignment?.reminders ?? []);
+  const [checklist, setChecklist] = useState<ChecklistItem[]>(draft?.checklist ?? assignment?.checklist ?? []);
+  const [newStep, setNewStep] = useState(draft?.newStep ?? "");
+  const [notes, setNotes] = useState<DraftNote[]>(draft?.notes ?? assignment?.notes ?? []);
+  const [images, setImages] = useState<DraftImage[]>(draft?.images ?? assignment?.images ?? []);
+
+  const { showReset, discard } = useKeepDraft<AssignmentDraft>({
+    key: draftKey,
+    enabled: !assignment,
+    restored: draft,
+    values: { title, dueDate, hasTime, subjectId, reminders, checklist, newStep, notes, images },
+    isEmpty:
+      isBlank(title) &&
+      subjectId === "" &&
+      !hasTime &&
+      dueDate.getTime() === defaultDueDate().getTime() &&
+      reminders.length === 0 &&
+      checklist.every((item) => isBlank(item.text)) &&
+      isBlank(newStep) &&
+      notes.length === 0 &&
+      images.length === 0,
+  });
+
+  const reset = () => {
+    discard();
+    onReset();
+  };
 
   /// Step inputs by id, so Return can move the cursor down the list.
   const stepInputs = useRef(new Map<string, HTMLInputElement>());
@@ -124,6 +177,7 @@ export function AssignmentForm({ assignment }: { assignment?: Assignment }) {
       reminders,
       createdAt: assignment?.createdAt ?? Date.now(),
     });
+    discard();
     dismiss();
   };
 
@@ -140,6 +194,7 @@ export function AssignmentForm({ assignment }: { assignment?: Assignment }) {
       />
       <SheetBody>
         <List>
+          {showReset && <RestoredDraftBanner onReset={reset} />}
           <Section header="Details">
             <Row>
               <TextField

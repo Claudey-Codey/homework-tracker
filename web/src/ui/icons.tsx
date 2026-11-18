@@ -35,6 +35,7 @@ export {
   NotebookText as NoteIcon,
   FileText as PdfIcon,
   Pencil as PencilIcon,
+  RotateCcw as ResetIcon,
   Plus as PlusIcon,
   Search as SearchIcon,
   Settings as GearIcon,

@@ -1592,3 +1592,44 @@ button.cell {
 .alert-buttons .prominent-button:disabled {
   opacity: 0.4;
 }
+
+/* ---------- Restored draft ---------- */
+
+/* Sits above the first section of a reopened New Assignment / New Exam form. */
+.restored-draft {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 20px;
+  padding: 0 4px 0 16px;
+  font-size: 15px;
+  color: var(--label-2);
+  animation: fade-in 0.25s ease both;
+}
+
+/* A small `.borderedProminent` capsule, like iOS's blue buttons. */
+.reset-button {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 15px;
+  border-radius: 17px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 15px;
+  font-weight: 600;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.reset-button:active {
+  opacity: 0.8;
+  transform: scale(0.96);
+}
+
+.reset-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
