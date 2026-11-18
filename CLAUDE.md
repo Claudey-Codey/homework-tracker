@@ -8,11 +8,14 @@ features:
   `main` deploys it to GitHub Pages (`.github/workflows/deploy-web.yml`).
 - `TaskMng/`: the native SwiftUI + SwiftData iOS app (iOS 17+), set up with
   `project.yml` (XcodeGen) or by hand as described in `README.md`.
+- `api/`: the server for accounts and sync, a Cloudflare Worker with a D1
+  database and an R2 bucket (`api/README.md`). Pushing `api/**` to `main`
+  deploys it (`.github/workflows/deploy-api.yml`).
 
 ## Current focus: the web app only
 
-Make changes in `web/` only. Don't edit `TaskMng/` unless the user asks to
-update the iOS app.
+Make changes in `web/` (and `api/` for the server) only. Don't edit
+`TaskMng/` unless the user asks to update the iOS app.
 
 Every user-facing change to the web app goes in the **iOS backlog** below, in
 the same commit, so the iOS app can be brought up to date later without
@@ -45,6 +48,7 @@ When the user asks to update the iOS app:
 | `db.ts` | `Models/*.swift`, `TaskMngApp.swift` |
 | `views/NotesSection.tsx` | `Views/Components/NotesSection.swift` |
 | `views/scanner/DocumentScanner.tsx`, `support/scan/*` | `Views/Components/CaptureViews.swift` (VisionKit's scanner) |
+| `support/sync/*`, `views/account/SyncSection.tsx` | new: `Support/Sync/*`, `Views/Account/SyncSection.swift` |
 | `support/images.ts` (file sorting, names) | `Support/AttachmentImport.swift`, `Views/Components/Drafts.swift` |
 | `views/assignments/AssignmentForm.tsx` | `Views/Assignments/AssignmentFormView.swift` |
 | `views/exams/ExamForm.tsx` | `Views/Exams/ExamFormView.swift` |
@@ -139,6 +143,94 @@ Web: `selectTab` in `App.tsx`, `popToRoot` in `ui/NavStack.tsx`.
 (The web also fixed a bug where swiping down a note opened from a New
 Assignment or New Exam form closed the form too. SwiftUI's nested sheets
 don't have that problem, so there's nothing to port.)
+
+### 6. Accounts with passkeys, and sync
+
+Web: `support/sync/api.ts`, `support/sync/engine.ts`,
+`support/sync/account.ts`, `views/account/SyncSection.tsx`, the Sign-In and
+Delete Account sections in `views/account/EditAccountView.tsx`, and
+`Confirm` in `ui/Alert.tsx`. Server: `api/` (routes listed at the top of
+`api/src/index.ts`).
+
+What it does:
+
+- **Account tab, signed out:** a section below Edit Account / Settings with
+  "Create Account…" (`person.badge.plus`) and "Sign In with Passkey"
+  (`key`), footer "Keep your assignments, exams and subjects in an account
+  and use them on your other devices. You sign in with a passkey: Face ID or
+  Touch ID, no password." If the device's data belongs to an account whose
+  session ended (a 401), only Sign In shows, with footer "You were signed
+  out. Sign in again to keep syncing."
+- **Create Account…** asks for a name in an alert ("Create Account", message
+  "Your passkey is saved under this name.", button "Continue", prefilled with
+  the profile name), makes a passkey (`POST /auth/register/options` with
+  `{ name }`, then `/auth/register/verify`), sets the profile name to it and
+  uploads everything on the device.
+- **Sign In with Passkey:** `POST /auth/login/options`, the system passkey
+  sheet, then `/auth/login/verify`. If the device's data belonged to a
+  different account, it's wiped first. A 404 with code `unknown_passkey`
+  shows "That passkey’s account was deleted. Create a new account, or choose
+  another passkey." Cancelling the passkey sheet shows nothing.
+- **Signed in:** a "Sync" section with one row: cloud icon and "Synced" /
+  "Syncing…" (spinning arrows) / "Offline" / "Couldn’t Sync" (red), with "Just
+  now", "5 min ago" or a time on the right. Tapping it syncs. Footer "Signed
+  in as {profile name}. Changes sync on their own.", or the error message.
+  Below it a red centered "Sign Out".
+- **Sign Out** first syncs. If that worked: alert "Sign Out?" / "Your
+  assignments, exams and subjects stay in your account and are removed from
+  this device." [Cancel] [Sign Out (destructive)]. If not: "Some Changes
+  Haven’t Synced" / "They can’t reach your account right now. If you sign
+  out, they’ll be lost." [Cancel] [Sign Out Anyway]. Signing out removes all
+  subjects, assignments, exams, files and the profile from the device.
+- **Edit Account, signed in:** replaces the fake Password row with a
+  "Sign-In" section (row: key icon, "Passkey", "Face ID or Touch ID"; footer
+  "Your passkey is in your iCloud Keychain, so your other Apple devices can
+  sign in with it too.") and a red "Delete Account" (alert "Delete Account?" /
+  "Your account and everything in it are deleted from the cloud for good.
+  What’s on this device stays here." [Cancel] [Delete]). Signed out, there is
+  no Password row any more.
+- **Settings ▸ Backup footer**, signed in: "Your data syncs to your account. A
+  backup is an extra copy you keep yourself. Restoring adds the backup's
+  items back and leaves anything already here alone."
+
+How sync works (port this exactly so iOS and web share an account):
+
+- Records are `{ kind, id, deleted, data }`, kinds `subject`, `assignment`,
+  `exam` and `profile` (id `account`). `data` is the record as JSON with the
+  web's field names (`db.ts`): dates are milliseconds since 1970, children
+  (checklist, notes, reminders, images) are arrays inside the record. The
+  profile is `{ name, colorHex, avatarKind, emoji, preset, photo }`, where
+  `photo` is a fingerprint of the profile photo or null.
+- Files go to `PUT/GET/DELETE /files/<key>`, keys `image:<attachment id>`
+  and `avatarPhoto`.
+- Keep, per record and per file, what the last sync agreed on (a hash of the
+  record's JSON with sorted keys; for files, size and type, or a content hash
+  for the photo), plus the last `cursor`.
+- A sync: (1) `GET /sync?since=<cursor>` until `more` is false. For each
+  change, skip it if this device has an unsent edit of the same record,
+  except on the first sync after signing in, where the server wins. Applying
+  one deletes files the old version pointed to and the new one doesn't.
+  (2) Download files records point to that are missing. A 404 is retried
+  next time. (3) Upload new or changed files, delete removed ones, then
+  `POST /sync` `{ changes }` with changed and deleted records, at most 100
+  per request.
+- Sync a moment after any change, when the app comes to the front, when it
+  goes back online and every minute while open.
+- Send `Authorization: Bearer <token>` on every request. A 401 means the
+  session ended: forget the token, keep the data, show Sign In.
+
+iOS specifics:
+
+- Passkeys on iOS need the app to share the web's relying party,
+  `claudey-codey.github.io`: an Associated Domains entitlement
+  `webcredentials:claudey-codey.github.io`, and an
+  `apple-app-site-association` file served from
+  `https://claudey-codey.github.io/.well-known/`, which only a
+  `claudey-codey.github.io` repository can publish. Without that, use
+  `ASWebAuthenticationSession` or wait for Google sign-in.
+- Use `ASAuthorizationPlatformPublicKeyCredentialProvider` for the passkey,
+  `URLSession` for the API, and keep the token in the Keychain.
+- New permissions and the entitlement go in `project.yml` and the README.
 
 ## Working on the web app
 

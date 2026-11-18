@@ -26,38 +26,83 @@ export function Alert({
   );
 }
 
-/// An `.alert` with a text field — Rename. Return saves, Escape cancels, and
-/// Save stays off while the field is blank.
-export function Prompt({
+/// A two-button `.alert` — Cancel and an action, such as "Sign Out". A
+/// destructive action is shown in red.
+export function Confirm({
   title,
-  initialValue,
-  onSave,
+  message,
+  actionLabel,
+  destructive,
+  isPresented,
+  onConfirm,
   onClose,
 }: {
   title: string;
-  /// Null hides the prompt.
-  initialValue: string | null;
-  onSave: (value: string) => void;
+  message: string;
+  actionLabel: string;
+  destructive?: boolean;
+  isPresented: boolean;
+  onConfirm: () => void;
   onClose: () => void;
 }) {
-  if (initialValue === null) return null;
+  if (!isPresented) return null;
   return createPortal(
-    <PromptBody title={title} initialValue={initialValue} onSave={onSave} onClose={onClose} />,
+    <div className="alert-backdrop" onClick={onClose}>
+      <div className="alert" role="alertdialog" aria-label={title} onClick={(e) => e.stopPropagation()}>
+        <div className="alert-title">{title}</div>
+        <div className="alert-message">{message}</div>
+        <div className="alert-buttons">
+          <button type="button" className="alert-button" onClick={onClose} autoFocus>
+            Cancel
+          </button>
+          <button
+            type="button"
+            className={destructive ? "alert-button destructive" : "prominent-button"}
+            onClick={() => {
+              onClose();
+              onConfirm();
+            }}
+          >
+            {actionLabel}
+          </button>
+        </div>
+      </div>
+    </div>,
     document.body,
   );
 }
 
+interface PromptProps {
+  title: string;
+  /// Shown under the title, as in an alert.
+  message?: string;
+  /// The confirm button. "Save" unless given.
+  actionLabel?: string;
+  onSave: (value: string) => void;
+  onClose: () => void;
+}
+
+/// An `.alert` with a text field — Rename. Return saves, Escape cancels, and
+/// Save stays off while the field is blank.
+export function Prompt({
+  initialValue,
+  ...props
+}: PromptProps & {
+  /// Null hides the prompt.
+  initialValue: string | null;
+}) {
+  if (initialValue === null) return null;
+  return createPortal(<PromptBody initialValue={initialValue} {...props} />, document.body);
+}
+
 function PromptBody({
   title,
+  message,
+  actionLabel = "Save",
   initialValue,
   onSave,
   onClose,
-}: {
-  title: string;
-  initialValue: string;
-  onSave: (value: string) => void;
-  onClose: () => void;
-}) {
+}: PromptProps & { initialValue: string }) {
   const [value, setValue] = useState(initialValue);
   const blank = value.trim() === "";
   const save = () => {
@@ -81,6 +126,7 @@ function PromptBody({
         }}
       >
         <div className="alert-title">{title}</div>
+        {message && <div className="alert-message">{message}</div>}
         <input
           className="alert-field"
           value={value}
@@ -96,7 +142,7 @@ function PromptBody({
             Cancel
           </button>
           <button type="submit" className="prominent-button" disabled={blank}>
-            Save
+            {actionLabel}
           </button>
         </div>
       </form>

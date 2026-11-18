@@ -1,0 +1,20 @@
+{
+  "name": "taskmng-api",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler d1 migrations apply taskmng --remote && wrangler deploy",
+    "migrate:local": "wrangler d1 migrations apply taskmng --local",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@simplewebauthn/server": "14.0.3"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261118.1",
+    "typescript": "5.9.3",
+    "wrangler": "4.157.0"
+  }
+}

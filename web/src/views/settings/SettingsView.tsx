@@ -2,6 +2,7 @@ import { useState } from "react";
 import { pickBackupFile, restoreBackup, shareBackup } from "../../support/backup";
 import { checkOn } from "../../support/feedback";
 import { keys, useSetting } from "../../support/settings";
+import { useAccountSession } from "../../support/sync/account";
 import { accents, appearances, defaultAccentHex, type ThemeAppearance } from "../../support/theme";
 import { Alert } from "../../ui/Alert";
 import { HalfCircleIcon, ImportIcon, MoonIcon, ShareIcon, SunIcon } from "../../ui/icons";
@@ -15,6 +16,7 @@ export function SettingsView() {
   const [appearance, setAppearance] = useSetting<ThemeAppearance>(keys.appearance, "system");
   const [feedbackEnabled, setFeedbackEnabled] = useSetting(keys.feedbackEnabled, true);
   const [showTabLabels, setShowTabLabels] = useSetting(keys.showTabLabels, true);
+  const { account } = useAccountSession();
   const [backupMessage, setBackupMessage] = useState<{ title: string; message: string } | null>(null);
 
   const backUp = () =>
@@ -72,7 +74,11 @@ export function SettingsView() {
 
         <Section
           header="Backup"
-          footer="Everything lives on this iPhone, inside the Home Screen app. Removing the app from the Home Screen deletes it, so back up first. Restoring adds the backup's items back and leaves anything already here alone."
+          footer={
+            account
+              ? "Your data syncs to your account. A backup is an extra copy you keep yourself. Restoring adds the backup's items back and leaves anything already here alone."
+              : "Everything lives on this iPhone, inside the Home Screen app. Removing the app from the Home Screen deletes it, so back up first. Restoring adds the backup's items back and leaves anything already here alone."
+          }
         >
           <ButtonRow icon={<ShareIcon size={20} />} label="Back Up Data…" onClick={() => void backUp()} />
           <ButtonRow icon={<ImportIcon size={20} />} label="Restore from Backup…" onClick={restore} />

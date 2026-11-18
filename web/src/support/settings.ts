@@ -45,6 +45,18 @@ export function writeSetting<T>(key: string, value: T) {
   window.dispatchEvent(new Event(changeEvent));
 }
 
+export function removeSetting(key: string) {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // Nothing stored, or storage unavailable: either way it's gone.
+  }
+  window.dispatchEvent(new Event(changeEvent));
+}
+
+/// Calls `listener` whenever any setting is written, here or in another tab.
+export const subscribeToSettings = subscribe;
+
 export function useSetting<T>(key: string, fallback: T): [T, (value: T) => void] {
   const raw = useSyncExternalStore(subscribe, () => readRaw(key));
   let value = fallback;

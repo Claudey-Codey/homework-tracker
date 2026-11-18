@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
+import { startAutoSync } from "./support/sync/engine";
 import "./styles.css";
 
 createRoot(document.getElementById("root")!).render(
@@ -8,6 +9,8 @@ createRoot(document.getElementById("root")!).render(
     <App />
   </StrictMode>,
 );
+
+startAutoSync();
 
 // Offline support and, later, notifications. Only in a real build — a
 // service worker caching dev-server files would just get in the way.

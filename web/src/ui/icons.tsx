@@ -11,6 +11,9 @@ export {
   Camera as CameraIcon,
   Braces as CodeIcon,
   Check as CheckIcon,
+  Cloud as CloudIcon,
+  CloudOff as CloudOffIcon,
+  CloudAlert as CloudAlertIcon,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
   ChevronsUpDown as ChevronsUpDownIcon,
@@ -26,6 +29,7 @@ export {
   Images as PhotoStackIcon,
   Import as ImportIcon,
   Italic as ItalicIcon,
+  KeyRound as KeyIcon,
   LayoutGrid as GridIcon,
   LibraryBig as BooksIcon,
   List as BulletListIcon,
@@ -37,6 +41,7 @@ export {
   NotebookText as NoteIcon,
   FileText as PdfIcon,
   Pencil as PencilIcon,
+  RefreshCw as SyncIcon,
   RotateCcw as ResetIcon,
   RotateCw as RotateIcon,
   ScanLine as ScanIcon,
@@ -52,6 +57,7 @@ export {
   Type as TextFormatIcon,
   Undo2 as UndoIcon,
   Upload as UploadIcon,
+  UserPlus as PersonAddIcon,
 } from "lucide-react";
 
 type IconProps = SVGProps<SVGSVGElement> & { size?: number };

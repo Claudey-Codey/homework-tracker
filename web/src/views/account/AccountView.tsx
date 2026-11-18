@@ -6,6 +6,7 @@ import { Screen, useNavigation } from "../../ui/NavStack";
 import { SettingsView } from "../settings/SettingsView";
 import { AvatarView } from "./AvatarView";
 import { EditAccountView } from "./EditAccountView";
+import { SyncSection } from "./SyncSection";
 import { useAccount } from "./useAccount";
 
 /// The "you" tab: profile, a snapshot of your workload, and the way into
@@ -68,6 +69,8 @@ export function AccountView() {
           />
           <LinkRow icon={<GearIcon size={21} />} label="Settings" onClick={() => push(<SettingsView />)} />
         </Section>
+
+        <SyncSection />
       </List>
     </Screen>
   );

@@ -2050,3 +2050,20 @@ button.cell {
 .alert-button.destructive {
   color: var(--red);
 }
+
+/* The sync row's arrows turn while a sync runs. */
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinning {
+    animation: none;
+  }
+}

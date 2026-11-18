@@ -5,7 +5,10 @@ iPhone's Home Screen. No Mac, Xcode or Apple account needed, and it doesn't
 expire after 7 days.
 
 Built with React + TypeScript + Vite. Everything is stored on the device, in
-the browser's IndexedDB. There is no server and no account.
+the browser's IndexedDB, and works offline. With an account (**Account ▸
+Create Account…**, signed in with a passkey) it also syncs to the TaskMng API
+in [`../api/`](../api/README.md), a Cloudflare Worker with a D1 database, so
+your other devices see the same assignments, exams, subjects and profile.
 
 ## Install it on an iPhone
 
@@ -19,8 +22,9 @@ you haven't visited in a while, but Home Screen apps are protected from that.
 
 ### Backups, and re-adding the app
 
-Your data lives inside the Home Screen app, so **removing the icon deletes
-it**. Before you remove it, go to **Account ▸ Settings ▸ Back Up Data…** and
+Without an account, your data lives only inside the Home Screen app, so
+**removing the icon deletes it**. (Signed in, it's in your account too: add
+the app again and sign in.) Before you remove it, go to **Account ▸ Settings ▸ Back Up Data…** and
 save the file to Files. After adding the app again, use **Restore from
 Backup…** in the same place.
 
@@ -38,6 +42,12 @@ npm run dev        # live-reloading dev server, prints a local and a network URL
 npm run build      # type-checks, then builds the site into web/dist/
 npm run preview    # serves web/dist/ to try the real build (offline mode included)
 ```
+
+Accounts and sync only show up when the build knows the API's address,
+`VITE_API_URL`. Production reads it from `web/.env.production`. To try sync
+locally, run the API (see [`api/README.md`](../api/README.md)) and start the
+dev server with `VITE_API_URL=http://127.0.0.1:8787 npm run dev`. Passkeys
+need `localhost` or https, so the Network URL below can't sign in.
 
 `npm run dev` also prints a **Network** URL. With your phone on the same Wi-Fi,
 open it in Safari to try changes on the phone right away.
@@ -63,6 +73,7 @@ paths are relative, so it works at the root of a domain or in a sub-folder.
 |--------------------------------|------------------------------------------|
 | SwiftData models (`Models/`)   | `db.ts` (IndexedDB via Dexie)            |
 | `@AppStorage`                  | `support/settings.ts` (localStorage)     |
+| (no iOS counterpart yet)       | `support/sync/*` (account, passkeys, sync) |
 | `RootTabView`                  | `App.tsx`                                |
 | `NavigationStack`, `.sheet`    | `ui/NavStack.tsx`, `ui/Sheet.tsx`        |
 | `Form` / `List` sections       | `ui/List.tsx` + `styles.css`             |
@@ -84,4 +95,4 @@ Other files:
   they don't notify you yet. A web app can't schedule a notification by itself
   on iPhone. A small server has to send it at the right time, and that's the
   next piece to build.
-- Data stays on one device. Nothing syncs between your phone and a computer.
+- **Google sign-in.** Accounts use passkeys only for now.

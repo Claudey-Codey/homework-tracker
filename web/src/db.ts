@@ -93,11 +93,21 @@ export interface StoredFile {
   blob: Blob;
 }
 
+/// What the last sync agreed with the server about one record or file, so the
+/// next sync can tell what changed here since. Also holds the sync's own
+/// bookkeeping, such as how far it has pulled. Keys look like
+/// "assignment:<id>", "file:image:<id>" and "meta:cursor".
+export interface SyncStateEntry {
+  key: string;
+  value: string;
+}
+
 class TaskDatabase extends Dexie {
   subjects!: EntityTable<Subject, "id">;
   assignments!: EntityTable<Assignment, "id">;
   exams!: EntityTable<Exam, "id">;
   files!: EntityTable<StoredFile, "key">;
+  syncState!: EntityTable<SyncStateEntry, "key">;
 
   constructor() {
     super("taskmng");
@@ -107,6 +117,7 @@ class TaskDatabase extends Dexie {
       exams: "id, date, subjectId",
       files: "key",
     });
+    this.version(2).stores({ syncState: "key" });
   }
 }
 
