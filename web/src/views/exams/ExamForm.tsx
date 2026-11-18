@@ -25,6 +25,7 @@ type ExamDraft = {
   hasTime: boolean;
   subjectId: string;
   reminders: Reminder[];
+  score: string;
 };
 
 const draftKey = "new-exam";
@@ -48,14 +49,16 @@ function ExamFormBody({ exam, onReset }: { exam?: Exam; onReset: () => void }) {
   const [hasTime, setHasTime] = useState(draft?.hasTime ?? exam?.hasTime ?? false);
   const [subjectId, setSubjectId] = useState(draft?.subjectId ?? exam?.subjectId ?? "");
   const [reminders, setReminders] = useState<Reminder[]>(draft?.reminders ?? exam?.reminders ?? []);
+  const [score, setScore] = useState(draft?.score ?? exam?.score ?? "");
 
   const { showReset, discard } = useKeepDraft<ExamDraft>({
     key: draftKey,
     enabled: !exam,
     restored: draft,
-    values: { title, notes, images, date, hasTime, subjectId, reminders },
+    values: { title, notes, images, date, hasTime, subjectId, reminders, score },
     isEmpty:
       title.trim() === "" &&
+      score.trim() === "" &&
       subjectId === "" &&
       !hasTime &&
       date.getTime() === defaultExamDate().getTime() &&
@@ -82,6 +85,7 @@ function ExamFormBody({ exam, onReset }: { exam?: Exam; onReset: () => void }) {
       notes: finalizeNotes(notes, exam?.notes),
       images: savedImages,
       reminders,
+      score: score.trim() || undefined,
       createdAt: exam?.createdAt ?? Date.now(),
     });
     discard();
@@ -124,6 +128,18 @@ function ExamFormBody({ exam, onReset }: { exam?: Exam; onReset: () => void }) {
             <DateRow label="Date" value={date} onChange={setDate} />
             <ToggleRow label="Set a time" isOn={hasTime} onChange={setHasTime} />
             {hasTime && <TimeRow label="Time" value={date} onChange={setDate} />}
+          </Section>
+
+          <Section header="Score" footer="Shown on the exam in the Exams list. Leave it empty until you get your result.">
+            <Row>
+              <TextField
+                placeholder="e.g. 92, 18/20 or A"
+                aria-label="Score"
+                value={score}
+                onChange={(event) => setScore(event.target.value)}
+                enterKeyHint="done"
+              />
+            </Row>
           </Section>
 
           <NotesSection

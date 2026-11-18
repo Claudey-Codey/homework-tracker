@@ -83,6 +83,10 @@ export interface Exam {
   /// Attached pictures and PDFs. Missing on records from before images existed.
   images?: ImageAttachment[];
   reminders: Reminder[];
+  /// The mark you got, as typed: "92", "18/20", "A-". Free text because
+  /// schools grade in different ways. Missing or empty means no score yet,
+  /// and the exam's row then shows nothing for it.
+  score?: string;
   createdAt: number;
 }
 

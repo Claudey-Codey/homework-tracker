@@ -81,6 +81,7 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
   const noteCount = exam.notes.length;
   const pdfCount = exam.images?.filter(isPdf).length ?? 0;
   const imageCount = (exam.images?.length ?? 0) - pdfCount;
+  const score = exam.score?.trim() ?? "";
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "10px 0" }}>
@@ -91,6 +92,13 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
 
         {subject && exam.title && (
           <span className="caption secondary" dir="auto">{subject.name}</span>
+        )}
+
+        {/* Only once there's a score: an exam without one shows nothing here. */}
+        {score && (
+          <span className="caption" style={{ fontWeight: 600 }} dir="auto">
+            Score: {score}
+          </span>
         )}
 
         {/* What's attached, as counts, the same as on an assignment's row. */}

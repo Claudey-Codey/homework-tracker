@@ -140,6 +140,31 @@ Web: `selectTab` in `App.tsx`, `popToRoot` in `ui/NavStack.tsx`.
 Assignment or New Exam form closed the form too. SwiftUI's nested sheets
 don't have that problem, so there's nothing to port.)
 
+### 6. Exam score
+
+Web: `Exam.score` in `db.ts`, `ExamForm.tsx`, `ExamRow` in
+`views/exams/ExamsView.tsx`.
+
+- An exam has an optional score, kept as free text exactly as typed ("92",
+  "18/20", "A-"), because schools grade in different ways. iOS: add
+  `var score: String?` to the `Exam` model (optional, so existing stores
+  migrate without a default).
+- New and Edit Exam forms (`Views/Exams/ExamFormView.swift`) get a section
+  between "Exam" and "Study material": header "Score", one `TextField` with
+  the placeholder "e.g. 92, 18/20 or A", and the footer "Shown on the exam in
+  the Exams list. Leave it empty until you get your result."
+- On Save the text is trimmed; an empty result is stored as `nil`, so
+  clearing the field removes the score.
+- The score is part of a New Exam's 5-second draft (backlog item 2): it's
+  kept and restored with the rest, and a form with only a score typed counts
+  as not empty.
+- In the Exams list (`Views/Exams/ExamsView.swift`), an exam with a score
+  shows a line "Score: 18/20" under the title (and subject), above the counts
+  line: caption size, semibold, primary colour. With no score the line isn't
+  there at all.
+- Backups include the score automatically, as part of the exam.
+
+
 ## Working on the web app
 
 - Run commands in `web/`: `npm ci`, `npm run dev`, `npm run typecheck`, and
