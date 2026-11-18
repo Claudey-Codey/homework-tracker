@@ -121,6 +121,25 @@ number, each only when there is at least one. iOS: change the exam row in
 `Views/Exams/ExamsView.swift` to match the counts line in
 `Views/Assignments/AssignmentRow.swift`.
 
+### 5. Tabs go back to their first page
+
+Web: `selectTab` in `App.tsx`, `popToRoot` in `ui/NavStack.tsx`.
+
+- Tapping the tab you're already on goes back to that tab's first page with
+  the usual Back animation, however many pages deep you are (Account → Edit
+  Account → photo picker goes straight back to Account).
+- Leaving a tab also sends it back to its first page, without animation, so
+  returning to Account shows the Account page, not Edit Account or Settings.
+- Only Account opens pages today, but this applies to every tab.
+- iOS: give each tab's `NavigationStack` a `path` array, and select tabs
+  through a custom `Binding` on `TabView`'s selection. When the new value
+  equals the current one, empty that tab's path (inside `withAnimation`).
+  Otherwise empty the path of the tab being left.
+
+(The web also fixed a bug where swiping down a note opened from a New
+Assignment or New Exam form closed the form too. SwiftUI's nested sheets
+don't have that problem, so there's nothing to port.)
+
 ## Working on the web app
 
 - Run commands in `web/`: `npm ci`, `npm run dev`, `npm run typecheck`, and

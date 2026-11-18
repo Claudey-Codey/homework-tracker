@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -34,7 +35,15 @@ interface Entry {
 
 const popDuration = 360;
 
-export function NavStack({ root }: { root: ReactNode }) {
+/// Asks a `NavStack` to go back to its first screen. Each new request needs
+/// a new `id`. `animated` slides the current screen away as Back does; without
+/// it the stack just resets, for a tab that isn't showing.
+export interface PopToRootRequest {
+  id: number;
+  animated: boolean;
+}
+
+export function NavStack({ root, popToRoot }: { root: ReactNode; popToRoot?: PopToRootRequest }) {
   const nextKey = useRef(1);
   const [entries, setEntries] = useState<Entry[]>([{ key: 0, screen: root }]);
   const [pushed, setPushed] = useState<number | null>(null);
@@ -60,6 +69,35 @@ export function NavStack({ root }: { root: ReactNode }) {
       return current;
     });
   }, []);
+
+  /// Back to the first screen in one go. Screens in between leave at once;
+  /// only the one showing slides away.
+  const popAll = useCallback((animated: boolean) => {
+    setEntries((current) => {
+      if (current.length < 2) return current;
+      const first = current[0]!;
+      if (!animated) {
+        setPushed(null);
+        setPopping(null);
+        return [first];
+      }
+      const top = current[current.length - 1]!;
+      setPopping(top.key);
+      setPushed(null);
+      window.setTimeout(() => {
+        setEntries((latest) => latest.filter((entry) => entry.key !== top.key));
+        setPopping((key) => (key === top.key ? null : key));
+      }, popDuration);
+      return [first, top];
+    });
+  }, []);
+
+  const handled = useRef(popToRoot?.id);
+  useEffect(() => {
+    if (!popToRoot || popToRoot.id === handled.current) return;
+    handled.current = popToRoot.id;
+    popAll(popToRoot.animated);
+  }, [popToRoot, popAll]);
 
   const top = entries.length - 1;
 

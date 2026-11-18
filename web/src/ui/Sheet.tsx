@@ -87,8 +87,14 @@ function SheetFrame({
   const [phase, setPhase] = useState<"idle" | "dragging" | "settling">("idle");
 
   // Only the nav bar starts a drag, so scrolling the form never fights it.
+  //
+  // A sheet opened from inside another (a note from a form) is a portal, and
+  // React hands a portal's events up to the component that rendered it, so
+  // the form would see the note's drag too and close along with it. Only a
+  // touch on this sheet's own elements counts.
   const onPointerDown = (event: React.PointerEvent) => {
     const target = event.target as HTMLElement;
+    if (!sheetRef.current?.contains(target)) return;
     if (!target.closest("[data-drag-handle]") || target.closest("button, input, a")) return;
     drag.current = { startY: event.clientY, lastY: event.clientY, lastTime: event.timeStamp, velocity: 0 };
     sheetRef.current?.setPointerCapture(event.pointerId);

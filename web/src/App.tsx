@@ -4,7 +4,7 @@ import { configureAudioSession, prepareFeedback } from "./support/feedback";
 import { keys, useSetting } from "./support/settings";
 import { defaultAccentHex, type ThemeAppearance } from "./support/theme";
 import { BooksIcon, GraduationCapIcon, ListRectangleIcon } from "./ui/icons";
-import { NavStack } from "./ui/NavStack";
+import { NavStack, type PopToRootRequest } from "./ui/NavStack";
 import { AccountView } from "./views/account/AccountView";
 import { AvatarView } from "./views/account/AvatarView";
 import { useAccount } from "./views/account/useAccount";
@@ -22,12 +22,26 @@ function onAccentColor(hex: string): string {
 const tabs = ["assignments", "exams", "subjects", "account"] as const;
 type Tab = (typeof tabs)[number];
 
-/// The four tabs, each with its own navigation stack that survives switching.
+/// The four tabs, each with its own navigation stack. As on iOS, tapping the
+/// tab you're on goes back to its first screen; leaving a tab also sends it
+/// back there, so coming back to Account shows Account, not the page that was
+/// open before.
 export function App() {
   const [accentHex] = useSetting(keys.accent, defaultAccentHex);
   const [appearance] = useSetting<ThemeAppearance>(keys.appearance, "system");
   const [showTabLabels] = useSetting(keys.showTabLabels, true);
   const [selected, setSelected] = useState<Tab>("assignments");
+  const [popRequests, setPopRequests] = useState<Partial<Record<Tab, PopToRootRequest>>>({});
+
+  const selectTab = (tab: Tab) => {
+    // The tab being tapped if it's already showing, or the one being left.
+    const target = tab === selected ? tab : selected;
+    setPopRequests((current) => ({
+      ...current,
+      [target]: { id: (current[target]?.id ?? 0) + 1, animated: tab === selected },
+    }));
+    setSelected(tab);
+  };
   const { avatar } = useAccount();
 
   // `.tint(...)` and `.preferredColorScheme(...)` for the whole app.
@@ -78,7 +92,7 @@ export function App() {
     <div className="app">
       {tabs.map((tab) => (
         <div key={tab} className="tab-pane" hidden={tab !== selected}>
-          <NavStack root={roots[tab]} />
+          <NavStack root={roots[tab]} popToRoot={popRequests[tab]} />
         </div>
       ))}
 
@@ -90,7 +104,7 @@ export function App() {
             className={item.id === selected ? "tab selected" : "tab"}
             aria-label={item.label}
             aria-current={item.id === selected ? "page" : undefined}
-            onClick={() => setSelected(item.id)}
+            onClick={() => selectTab(item.id)}
           >
             {item.icon(item.id === selected)}
             {showTabLabels && <span>{item.label}</span>}
