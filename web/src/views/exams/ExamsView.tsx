@@ -1,8 +1,8 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
-import { db, deleteExam, isPdf, type Exam, type Subject } from "../../db";
+import { db, deleteExam, examScore, isPdf, type Exam, type Subject } from "../../db";
 import { formatMonthDay, formatTime } from "../../support/dates";
-import { urgencyColor } from "../../support/due";
+import { examDateColor } from "../../support/due";
 import { noSubjectHex } from "../../support/theme";
 import { ContentUnavailable } from "../../ui/ContentUnavailable";
 import { GlassButton } from "../../ui/GlassButton";
@@ -81,6 +81,7 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
   const noteCount = exam.notes.length;
   const pdfCount = exam.images?.filter(isPdf).length ?? 0;
   const imageCount = (exam.images?.length ?? 0) - pdfCount;
+  const score = examScore(exam);
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "10px 0" }}>
@@ -118,7 +119,17 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
         )}
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
+      {/* On the right, in red like a mark on a test paper. Only once there's
+          a score: an exam without one shows nothing here. */}
+      {score !== null && (
+        <span className="score-mark" aria-label={`Score: ${score} out of 100`}>
+          {score}
+        </span>
+      )}
+
+      {/* A fixed width, so the scores line up from row to row whatever
+          the date's width. */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, minWidth: 58, flexShrink: 0 }}>
         <span className="subheadline" style={{ fontWeight: 600, color: examDateColor(exam.date) }}>
           {formatMonthDay(exam.date)}
         </span>
@@ -126,11 +137,4 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
       </div>
     </div>
   );
-}
-
-/// Like an assignment's due date, but a past exam is green rather than red:
-/// it's over, not something left undone.
-function examDateColor(date: number, now = new Date()): string {
-  if (date < now.getTime()) return "var(--green)";
-  return urgencyColor(date, false, now);
 }

@@ -13,7 +13,7 @@ import { ChevronsUpDownIcon } from "./icons";
 /// the real iOS date wheel / calendar / menu while it *looks* like SwiftUI.
 /// Desktop browsers won't open a picker from a click on an invisible input,
 /// hence `showPicker()`.
-function openPicker(event: React.MouseEvent<HTMLInputElement | HTMLSelectElement>) {
+export function openPicker(event: React.MouseEvent<HTMLInputElement | HTMLSelectElement>) {
   const input = event.currentTarget as HTMLInputElement;
   try {
     input.showPicker?.();

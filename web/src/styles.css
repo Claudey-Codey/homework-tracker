@@ -459,6 +459,21 @@ button.cell {
   text-align: start;
 }
 
+/* Text that may be Hebrew or English carries dir="auto", so each piece reads
+   in its own direction and its letters and punctuation come out right. It
+   still starts on the left, whatever the language, like Google Docs. */
+[dir="auto"] {
+  text-align: left;
+}
+
+/* Titles stay centred, but a Hebrew title still needs its own reading
+   direction, or punctuation at its end jumps to the wrong side. */
+.navbar-title,
+.large-title,
+.alert-title {
+  unicode-bidi: plaintext;
+}
+
 .cell.tappable {
   cursor: pointer;
   transition: background-color 0.3s;
@@ -731,6 +746,19 @@ button.cell {
   font-weight: 600;
 }
 
+/* An exam's score out of 100, in red like a mark on a test paper. A fixed
+   width, so the scores line up from row to row whether they have one, two
+   or three digits. */
+.score-mark {
+  flex-shrink: 0;
+  width: 36px;
+  text-align: center;
+  color: var(--red);
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 .swatches {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
@@ -748,6 +776,26 @@ button.cell {
   align-items: center;
   justify-content: center;
   color: #fff;
+}
+
+/* The custom-colour swatch: a colour wheel, as on SwiftUI's ColorPicker. The
+   gradient is a picture of every hue, not a UI colour, so it has no token. */
+.swatch.custom {
+  background: conic-gradient(
+    hsl(0, 100%, 55%), hsl(60, 100%, 50%), hsl(120, 90%, 45%), hsl(180, 100%, 45%),
+    hsl(240, 100%, 60%), hsl(300, 100%, 55%), hsl(360, 100%, 55%)
+  );
+  cursor: pointer;
+}
+
+.swatch-custom-fill {
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
 .swatch.selected::after {

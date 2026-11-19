@@ -3,14 +3,13 @@ import { requestPersistentStorage } from "./db";
 import { configureAudioSession, prepareFeedback } from "./support/feedback";
 import { keys, useSetting } from "./support/settings";
 import { defaultAccentHex, type ThemeAppearance } from "./support/theme";
-import { BooksIcon, GraduationCapIcon, ListRectangleIcon } from "./ui/icons";
+import { GraduationCapIcon, ListRectangleIcon } from "./ui/icons";
 import { NavStack, type PopToRootRequest } from "./ui/NavStack";
 import { AccountView } from "./views/account/AccountView";
 import { AvatarView } from "./views/account/AvatarView";
 import { useAccount } from "./views/account/useAccount";
 import { AssignmentsView } from "./views/assignments/AssignmentsView";
 import { ExamsView } from "./views/exams/ExamsView";
-import { SubjectsView } from "./views/subjects/SubjectsView";
 
 /// Readable text on top of the accent colour — Yellow needs dark text.
 function onAccentColor(hex: string): string {
@@ -19,10 +18,10 @@ function onAccentColor(hex: string): string {
   return 0.299 * r + 0.587 * g + 0.114 * b > 186 ? "#000" : "#fff";
 }
 
-const tabs = ["assignments", "exams", "subjects", "account"] as const;
+const tabs = ["assignments", "exams", "account"] as const;
 type Tab = (typeof tabs)[number];
 
-/// The four tabs, each with its own navigation stack. As on iOS, tapping the
+/// The three tabs, each with its own navigation stack. As on iOS, tapping the
 /// tab you're on goes back to its first screen; leaving a tab also sends it
 /// back there, so coming back to Account shows Account, not the page that was
 /// open before.
@@ -77,14 +76,12 @@ export function App() {
   const roots: Record<Tab, ReactNode> = {
     assignments: <AssignmentsView />,
     exams: <ExamsView />,
-    subjects: <SubjectsView />,
     account: <AccountView />,
   };
 
   const items: { id: Tab; label: string; icon: (selected: boolean) => ReactNode }[] = [
     { id: "assignments", label: "Assignments", icon: (on) => <ListRectangleIcon size={26} filled={on} /> },
     { id: "exams", label: "Exams", icon: () => <GraduationCapIcon size={26} strokeWidth={1.8} /> },
-    { id: "subjects", label: "Subjects", icon: () => <BooksIcon size={25} strokeWidth={1.8} /> },
     { id: "account", label: "Account", icon: () => <AvatarView {...avatar} size={26} /> },
   ];
 

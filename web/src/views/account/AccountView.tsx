@@ -4,12 +4,14 @@ import { ChecklistIcon, GearIcon, GraduationCapIcon, BooksIcon, PersonCardIcon, 
 import { LinkRow, List, Section } from "../../ui/List";
 import { Screen, useNavigation } from "../../ui/NavStack";
 import { SettingsView } from "../settings/SettingsView";
+import { SubjectsView } from "../subjects/SubjectsView";
 import { AvatarView } from "./AvatarView";
 import { EditAccountView } from "./EditAccountView";
 import { useAccount } from "./useAccount";
 
 /// The "you" tab: profile, a snapshot of your workload, and the way into
-/// Settings and account editing.
+/// account editing, Subjects and Settings. Subjects lives here rather than in
+/// the tab bar because it's set up once a term, not used every day.
 export function AccountView() {
   const { push } = useNavigation();
   const { name, avatar } = useAccount();
@@ -66,6 +68,7 @@ export function AccountView() {
             label="Edit Account"
             onClick={() => push(<EditAccountView />)}
           />
+          <LinkRow icon={<BooksIcon size={21} />} label="Subjects" onClick={() => push(<SubjectsView />)} />
           <LinkRow icon={<GearIcon size={21} />} label="Settings" onClick={() => push(<SettingsView />)} />
         </Section>
       </List>
