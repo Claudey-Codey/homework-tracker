@@ -29,8 +29,18 @@ export function urgencyColor(date: number, isDone: boolean, now = new Date()): s
 
 /// An exam that's behind you is done, not late, so its date turns green
 /// rather than red. Before then it warns like an assignment: orange within
-/// two days. Date-only exams count as past from the day after.
-export function examDateColor(date: number, now = new Date()): string {
+/// two days. Date-only exams count as past from the day after. Once it has a
+/// score the date goes grey, so the score's colour is the only one on the row.
+export function examDateColor(date: number, hasScore: boolean, now = new Date()): string {
+  if (hasScore) return "var(--label-2)";
   if (date < now.getTime()) return "var(--green)";
   return urgencyColor(date, false, now);
+}
+
+/// How an exam's score reads at a glance: green from 85, orange from 70,
+/// red below that.
+export function scoreColor(score: number): string {
+  if (score >= 85) return "var(--green)";
+  if (score >= 70) return "var(--orange)";
+  return "var(--red)";
 }

@@ -164,16 +164,24 @@ Web: `Exam.score` and `examScore` in `db.ts`, `ExamForm.tsx` (`scoreInput`),
   kept and restored with the rest, and a form with only a score typed counts
   as not empty.
 - In the Exams list (`Views/Exams/ExamsView.swift`), an exam with a score
-  shows just the number (no "/100", no "Score:", no circle or other shape
-  around it) in red, like a mark on a test paper, on the right of the row
+  shows just the number (no "/100", no "Score:") on the right of the row
   between the title column and the date, vertically centred: 16 pt bold,
-  monospaced digits, centred in a fixed 36 pt wide slot so one-, two- and
-  three-digit scores line up. SwiftUI: `Text("\(score)").font(.system(size:
-  16, weight: .bold)).monospacedDigit().foregroundStyle(.red).frame(width:
-  36)`, with `.accessibilityLabel("Score: \(score) out of 100")`. With no
-  score nothing is shown.
+  monospaced digits, centred in a fixed 40 pt wide, 26 pt tall slot so one-,
+  two- and three-digit scores line up. With no score nothing is shown.
+- The score's colour depends on the score: 85–100 green (`.green`), 70–84
+  orange (`.orange`), 0–69 red (`.red`). Web: `scoreColor` in
+  `support/due.ts`; on iOS add `scoreColor(for:)` next to `urgencyColor` in
+  `Support/DueDateUrgency.swift`.
+- A perfect 100 also sits in a light green rounded rectangle filling that
+  40 × 26 pt slot (corner radius 7, green at 18% opacity, like the subject
+  capsule's tint). No other score has a background.
+- SwiftUI: `Text("\(score)").font(.system(size: 16, weight:
+  .bold)).monospacedDigit().foregroundStyle(scoreColor(for: score)).frame(width:
+  40, height: 26).background(score == 100 ? Color.green.opacity(0.18) :
+  .clear, in: RoundedRectangle(cornerRadius: 7))`, with
+  `.accessibilityLabel("Score: \(score) out of 100")`.
 - The date column on the right of an exam's row has a fixed minimum width
-  (58 pt, right-aligned), so the score circles line up in one column from
+  (58 pt, right-aligned), so the scores line up in one column from
   row to row whatever the date's width: `.frame(minWidth: 58, alignment:
   .trailing)`.
 - Backups include the score automatically, as part of the exam.
@@ -188,12 +196,16 @@ Web: `examDateColor` in `support/due.ts`, used by `ExamRow` in
 - Before that nothing changes: orange within two days, primary colour
   otherwise. An exam without a time is stored at the end of its day, so it
   turns green the day after.
+- Once an exam has a score (backlog item 6), its date is secondary grey
+  (`.secondary`) whatever the date, so the score's colour is the only colour
+  on the row. Without a score the rules above apply.
 - Assignments are unchanged: overdue ones stay red.
-- iOS: add `examDateColor(for:now:)` next to `urgencyColor` in
-  `Support/DueDateUrgency.swift` (green when `date < now`, else
-  `urgencyColor(for: date, isDone: false, now: now)`), and use it for the
-  date in `Views/Exams/ExamsView.swift` (line with
-  `urgencyColor(for: exam.date, isDone: false)`).
+- iOS: add `examDateColor(for:hasScore:now:)` next to `urgencyColor` in
+  `Support/DueDateUrgency.swift` (`.secondary` when it has a score, green
+  when `date < now`, else `urgencyColor(for: date, isDone: false, now:
+  now)`), and use it for the date in `Views/Exams/ExamsView.swift` (line
+  with `urgencyColor(for: exam.date, isDone: false)`), passing
+  `exam.score != nil`.
 
 ### 8. Custom subject colour
 

@@ -2,7 +2,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
 import { db, deleteExam, examScore, isPdf, type Exam, type Subject } from "../../db";
 import { formatMonthDay, formatTime } from "../../support/dates";
-import { examDateColor } from "../../support/due";
+import { examDateColor, scoreColor } from "../../support/due";
 import { noSubjectHex } from "../../support/theme";
 import { ContentUnavailable } from "../../ui/ContentUnavailable";
 import { GlassButton } from "../../ui/GlassButton";
@@ -119,10 +119,15 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
         )}
       </div>
 
-      {/* On the right, in red like a mark on a test paper. Only once there's
-          a score: an exam without one shows nothing here. */}
+      {/* On the right, coloured by how well it went, and a perfect 100 in a
+          light green box. Only once there's a score: an exam without one
+          shows nothing here. */}
       {score !== null && (
-        <span className="score-mark" aria-label={`Score: ${score} out of 100`}>
+        <span
+          className={score === 100 ? "score-mark perfect" : "score-mark"}
+          style={{ color: scoreColor(score) }}
+          aria-label={`Score: ${score} out of 100`}
+        >
           {score}
         </span>
       )}
@@ -130,7 +135,7 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
       {/* A fixed width, so the scores line up from row to row whatever
           the date's width. */}
       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, minWidth: 58, flexShrink: 0 }}>
-        <span className="subheadline" style={{ fontWeight: 600, color: examDateColor(exam.date) }}>
+        <span className="subheadline" style={{ fontWeight: 600, color: examDateColor(exam.date, score !== null) }}>
           {formatMonthDay(exam.date)}
         </span>
         {exam.hasTime && <span className="caption2 secondary">{formatTime(exam.date)}</span>}

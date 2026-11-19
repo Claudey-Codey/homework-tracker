@@ -746,17 +746,25 @@ button.cell {
   font-weight: 600;
 }
 
-/* An exam's score out of 100, in red like a mark on a test paper. A fixed
-   width, so the scores line up from row to row whether they have one, two
-   or three digits. */
+/* An exam's score out of 100, coloured by the row (green, orange or red). A
+   fixed width, so the scores line up from row to row whether they have one,
+   two or three digits, and so the box around a 100 is the same size on
+   every row. */
 .score-mark {
   flex-shrink: 0;
-  width: 36px;
+  width: 40px;
+  line-height: 26px;
+  border-radius: 7px;
   text-align: center;
-  color: var(--red);
   font-size: 16px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+}
+
+/* A perfect score sits in a light green box, tinted like the subject
+   capsule so it follows the green in light and dark. */
+.score-mark.perfect {
+  background: color-mix(in srgb, var(--green) 18%, transparent);
 }
 
 .swatches {
