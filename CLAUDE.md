@@ -247,29 +247,7 @@ Web: the `[dir="auto"]` and `.navbar-title` rules in `styles.css`, and
   `.multilineTextAlignment(.leading)` and `.frame(maxWidth: .infinity,
   alignment: .leading)` where one doesn't.
 
-## Working on the web app
-
-- Run commands in `web/`: `npm ci`, `npm run dev`, `npm run typecheck`, and
-  `npm run build` (type check plus Vite build). There's no test runner; check
-  changes in a browser with Playwright, which is pre-installed in the cloud
-  container.
-- `ui/` holds hand-built stand-ins for SwiftUI controls (`Sheet`, `List` and
-  `Section`, `SwipeRow`, `Menu`, `Alert`, `Prompt`, …), named after their
-  SwiftUI counterparts. Reuse them before adding new ones.
-- Colours, sizes and fonts are the tokens at the top of `styles.css`, the
-  Apple system colours for light and dark. Don't add one-off colours.
-- Text fields' placeholders contain a zero-width space so Safari doesn't
-  offer AutoFill. In Playwright, find them with a regex such as
-  `getByPlaceholder(/itle \(optional/)` rather than the exact text.
-- To try the scanner without a phone, give Chromium a fake camera:
-  `--use-fake-ui-for-media-stream --use-fake-device-for-media-stream
-  --use-file-for-fake-video-capture=scene.y4m`, where `scene.y4m` is a video
-  (YUV 4:2:0) of a page on a desk. Make the page with a real camera
-  projection (a tilted A4 rectangle through a pinhole camera), not by placing
-  corners by hand, or the straightened page's proportions can't be checked.
-- Comments use `///` above declarations and explain why, in plain sentences.
-
-### 9. Subjects moves from the tab bar into Account
+### 10. Subjects moves from the tab bar into Account
 
 Web: `App.tsx`, `views/account/AccountView.tsx`,
 `views/subjects/SubjectsView.tsx`, and the subject pickers in
@@ -293,3 +271,25 @@ Web: `App.tsx`, `views/account/AccountView.tsx`,
   under Subjects." (`AssignmentFormView.swift`, `ExamFormView.swift`).
 - With item 5, leaving the Account tab also leaves the Subjects page, so
   coming back shows Account.
+
+## Working on the web app
+
+- Run commands in `web/`: `npm ci`, `npm run dev`, `npm run typecheck`, and
+  `npm run build` (type check plus Vite build). There's no test runner; check
+  changes in a browser with Playwright, which is pre-installed in the cloud
+  container.
+- `ui/` holds hand-built stand-ins for SwiftUI controls (`Sheet`, `List` and
+  `Section`, `SwipeRow`, `Menu`, `Alert`, `Prompt`, …), named after their
+  SwiftUI counterparts. Reuse them before adding new ones.
+- Colours, sizes and fonts are the tokens at the top of `styles.css`, the
+  Apple system colours for light and dark. Don't add one-off colours.
+- Text fields' placeholders contain a zero-width space so Safari doesn't
+  offer AutoFill. In Playwright, find them with a regex such as
+  `getByPlaceholder(/itle \(optional/)` rather than the exact text.
+- To try the scanner without a phone, give Chromium a fake camera:
+  `--use-fake-ui-for-media-stream --use-fake-device-for-media-stream
+  --use-file-for-fake-video-capture=scene.y4m`, where `scene.y4m` is a video
+  (YUV 4:2:0) of a page on a desk. Make the page with a real camera
+  projection (a tilted A4 rectangle through a pinhole camera), not by placing
+  corners by hand, or the straightened page's proportions can't be checked.
+- Comments use `///` above declarations and explain why, in plain sentences.
