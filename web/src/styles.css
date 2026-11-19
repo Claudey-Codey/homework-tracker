@@ -747,26 +747,31 @@ button.cell {
 }
 
 /* An exam's score out of 100, circled in red like a mark on a test paper.
-   A fixed round circle: the score is at most three digits. */
+   A fixed round circle hugging the number, which is at most three digits.
+   `text-box` trims the line box to the digits themselves, so they sit in the
+   true middle of the circle rather than a little high, as they do with the
+   font's usual space above and below; `line-height: 1` is the fallback. */
 .score-circle {
   flex-shrink: 0;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border: 2px solid var(--red);
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: var(--red);
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
+  line-height: 1;
+  text-box: trim-both cap alphabetic;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.5px;
 }
 
-/* Three digits need a smaller size to sit inside the circle. */
+/* Three digits need a smaller size to fit inside the circle. */
 .score-circle.full {
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .swatches {

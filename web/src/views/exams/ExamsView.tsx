@@ -127,7 +127,9 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
         </span>
       )}
 
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
+      {/* A fixed width, so the score circles line up from row to row whatever
+          the date's width. */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, minWidth: 58, flexShrink: 0 }}>
         <span className="subheadline" style={{ fontWeight: 600, color: examDateColor(exam.date) }}>
           {formatMonthDay(exam.date)}
         </span>
