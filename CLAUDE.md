@@ -164,6 +164,23 @@ Web: `Exam.score` in `db.ts`, `ExamForm.tsx`, `ExamRow` in
   there at all.
 - Backups include the score automatically, as part of the exam.
 
+### 7. Past exams' dates are green
+
+Web: `examDateColor` in `support/due.ts`, used by `ExamRow` in
+`views/exams/ExamsView.tsx`.
+
+- In the Exams list, an exam whose date has passed shows its date in green
+  (`.green`) instead of red: a past exam is done, not overdue.
+- Before that nothing changes: orange within two days, primary colour
+  otherwise. An exam without a time is stored at the end of its day, so it
+  turns green the day after.
+- Assignments are unchanged: overdue ones stay red.
+- iOS: add `examDateColor(for:now:)` next to `urgencyColor` in
+  `Support/DueDateUrgency.swift` (green when `date < now`, else
+  `urgencyColor(for: date, isDone: false, now: now)`), and use it for the
+  date in `Views/Exams/ExamsView.swift` (line with
+  `urgencyColor(for: exam.date, isDone: false)`).
+
 ## Working on the web app
 
 - Run commands in `web/`: `npm ci`, `npm run dev`, `npm run typecheck`, and

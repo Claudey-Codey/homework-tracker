@@ -2,7 +2,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
 import { db, deleteExam, isPdf, type Exam, type Subject } from "../../db";
 import { formatMonthDay, formatTime } from "../../support/dates";
-import { urgencyColor } from "../../support/due";
+import { examDateColor } from "../../support/due";
 import { noSubjectHex } from "../../support/theme";
 import { ContentUnavailable } from "../../ui/ContentUnavailable";
 import { GlassButton } from "../../ui/GlassButton";
@@ -127,7 +127,7 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
-        <span className="subheadline" style={{ fontWeight: 600, color: urgencyColor(exam.date, false) }}>
+        <span className="subheadline" style={{ fontWeight: 600, color: examDateColor(exam.date) }}>
           {formatMonthDay(exam.date)}
         </span>
         {exam.hasTime && <span className="caption2 secondary">{formatTime(exam.date)}</span>}
