@@ -750,6 +750,26 @@ button.cell {
   color: #fff;
 }
 
+/* The custom-colour swatch: a colour wheel, as on SwiftUI's ColorPicker. The
+   gradient is a picture of every hue, not a UI colour, so it has no token. */
+.swatch.custom {
+  background: conic-gradient(
+    hsl(0, 100%, 55%), hsl(60, 100%, 50%), hsl(120, 90%, 45%), hsl(180, 100%, 45%),
+    hsl(240, 100%, 60%), hsl(300, 100%, 55%), hsl(360, 100%, 55%)
+  );
+  cursor: pointer;
+}
+
+.swatch-custom-fill {
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
 .swatch.selected::after {
   content: "";
   position: absolute;

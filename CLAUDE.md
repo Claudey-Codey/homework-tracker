@@ -181,6 +181,31 @@ Web: `examDateColor` in `support/due.ts`, used by `ExamRow` in
   date in `Views/Exams/ExamsView.swift` (line with
   `urgencyColor(for: exam.date, isDone: false)`).
 
+### 8. Custom subject colour
+
+Web: `CustomSwatch` in `ui/Swatches.tsx` (`allowsCustom`), used by
+`SubjectForm` in `views/subjects/SubjectsView.tsx`.
+
+- New and Edit Subject keep all 11 palette colours and add a 12th circle at
+  the end of the Color grid: a colour wheel (rainbow). Tapping it opens the
+  system colour picker; the colour chosen there becomes the subject's colour.
+- While the subject's colour isn't one of the palette colours, the rainbow
+  circle is the selected one: a rainbow ring around a smaller circle of the
+  chosen colour, with the white checkmark. Picking a palette colour again
+  moves the selection back to that colour.
+- An existing subject whose colour isn't in the palette opens with the
+  rainbow circle selected.
+- Stored like any other colour: `colorHex` as "#RRGGBB", upper case, no
+  opacity.
+- iOS (`Views/Subjects/SubjectsView.swift`): after the `ForEach` in the
+  Color grid, add `ColorPicker("Custom color", selection:,
+  supportsOpacity: false).labelsHidden()` (it draws the rainbow circle and
+  presents the picker itself), bound to a `Binding<Color>` that reads
+  `Color(hex: colorHex)` and writes back a hex string. Add the Color → hex
+  conversion to `Support/Color+Hex.swift` (via `UIColor(color).getRed(…)`).
+  Show the chosen colour and checkmark over it when `colorHex` isn't in
+  `SubjectPalette.colors`, letting taps through (`.allowsHitTesting(false)`).
+
 ## Working on the web app
 
 - Run commands in `web/`: `npm ci`, `npm run dev`, `npm run typecheck`, and

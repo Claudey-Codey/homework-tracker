@@ -214,6 +214,7 @@ function SubjectForm({ subject }: { subject?: Subject }) {
                   colors={subjectPalette.map((hex) => ({ hex }))}
                   selected={colorHex}
                   onSelect={setColorHex}
+                  allowsCustom
                 />
               </div>
             </Row>
