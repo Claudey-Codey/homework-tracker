@@ -23,20 +23,34 @@ import {
 import { Menu } from "../../ui/Menu";
 import { SheetNav, useDismiss } from "../../ui/Sheet";
 
-/// Every paragraph picks its own direction from its first letter, so Hebrew
-/// lines sit on the right and English ones on the left — the web version of
-/// the iOS editor's `.natural` alignment.
+/// Every line starts on the left, whatever its language, like Google Docs.
+/// Paragraphs and headings still take their reading direction from their
+/// first letter (`dir="auto"`), so a Hebrew line keeps its punctuation in
+/// the right place; `text-align: left` in `styles.css` then lines it up on
+/// the left. Lists and quotes are always left to right, so their bullets,
+/// numbers and quote bar stay on the left too; the paragraphs inside them
+/// still pick their own direction.
 const AutoDirection = Extension.create({
   name: "autoDirection",
   addGlobalAttributes() {
     return [
       {
-        types: ["paragraph", "heading", "blockquote", "bulletList", "orderedList"],
+        types: ["paragraph", "heading"],
         attributes: {
           dir: {
             default: "auto",
             parseHTML: () => "auto",
             renderHTML: () => ({ dir: "auto" }),
+          },
+        },
+      },
+      {
+        types: ["blockquote", "bulletList", "orderedList"],
+        attributes: {
+          dir: {
+            default: "ltr",
+            parseHTML: () => "ltr",
+            renderHTML: () => ({ dir: "ltr" }),
           },
         },
       },

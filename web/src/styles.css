@@ -459,6 +459,21 @@ button.cell {
   text-align: start;
 }
 
+/* Text that may be Hebrew or English carries dir="auto", so each piece reads
+   in its own direction and its letters and punctuation come out right. It
+   still starts on the left, whatever the language, like Google Docs. */
+[dir="auto"] {
+  text-align: left;
+}
+
+/* Titles stay centred, but a Hebrew title still needs its own reading
+   direction, or punctuation at its end jumps to the wrong side. */
+.navbar-title,
+.large-title,
+.alert-title {
+  unicode-bidi: plaintext;
+}
+
 .cell.tappable {
   cursor: pointer;
   transition: background-color 0.3s;
@@ -729,6 +744,24 @@ button.cell {
 
 .segmented button.selected {
   font-weight: 600;
+}
+
+/* An exam's score, circled in red like a mark on a test paper. Grows into a
+   capsule for longer scores such as "18/20". */
+.score-circle {
+  align-self: flex-start;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 7px;
+  border: 2px solid var(--red);
+  border-radius: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--red);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .swatches {

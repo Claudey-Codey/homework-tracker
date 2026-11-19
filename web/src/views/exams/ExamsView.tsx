@@ -96,8 +96,8 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
 
         {/* Only once there's a score: an exam without one shows nothing here. */}
         {score && (
-          <span className="caption" style={{ fontWeight: 600 }} dir="auto">
-            Score: {score}
+          <span className="score-circle" dir="auto" aria-label={`Score: ${score}`}>
+            {score}
           </span>
         )}
 

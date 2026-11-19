@@ -159,9 +159,15 @@ Web: `Exam.score` in `db.ts`, `ExamForm.tsx`, `ExamRow` in
   kept and restored with the rest, and a form with only a score typed counts
   as not empty.
 - In the Exams list (`Views/Exams/ExamsView.swift`), an exam with a score
-  shows a line "Score: 18/20" under the title (and subject), above the counts
-  line: caption size, semibold, primary colour. With no score the line isn't
-  there at all.
+  shows it circled in red, like a mark on a test paper, under the title (and
+  subject) and above the counts line: just the score, no "Score:" label, in
+  red, 13 pt bold, inside a 2 pt red outline, 30 pt tall and at least 30 pt
+  wide, with 7 pt padding on each side so a longer score ("18/20") stretches
+  it into a capsule. Left-aligned in the row, not stretched. SwiftUI:
+  `Text(score).font(.system(size: 13, weight: .bold)).foregroundStyle(.red)
+  .padding(.horizontal, 7).frame(minWidth: 30, minHeight: 30)
+  .overlay(Capsule().stroke(.red, lineWidth: 2))`, with
+  `.accessibilityLabel("Score: \(score)")`. With no score nothing is shown.
 - Backups include the score automatically, as part of the exam.
 
 ### 7. Past exams' dates are green
@@ -205,6 +211,33 @@ Web: `CustomSwatch` in `ui/Swatches.tsx` (`allowsCustom`), used by
   conversion to `Support/Color+Hex.swift` (via `UIColor(color).getRed(…)`).
   Show the chosen colour and checkmark over it when `colorHex` isn't in
   `SubjectPalette.colors`, letting taps through (`.allowsHitTesting(false)`).
+
+### 9. Hebrew and English text both start on the left
+
+Web: the `[dir="auto"]` and `.navbar-title` rules in `styles.css`, and
+`AutoDirection` in `views/exams/StudyNoteEditor.tsx`.
+
+- Every piece of text the user types starts on the left, whatever its
+  language, like Google Docs: titles and subjects in the lists, text fields,
+  and every line of a note. Before, Hebrew lines sat on the right.
+- The letters and punctuation must still read correctly: each line keeps its
+  own reading direction (taken from its first letter), so "מלכים פרק א' + פרק
+  ג'" keeps its apostrophes and plus in place; only the alignment changes.
+- In notes, bullets, numbers and the quote bar always sit on the left, even on
+  a Hebrew line.
+- Titles that are centred (navigation bar, alerts) stay centred, but a Hebrew
+  title keeps its own reading direction there too, so the apostrophe at the
+  end of "סיכום פרק א'" doesn't jump to the wrong side.
+- iOS: in `Support/MarkdownStyler.swift`, `paragraphStyle(for:)` sets
+  `alignment = .natural` ("Hebrew right, English left"). Change it to
+  `.left`, keep `baseWritingDirection = .natural` for body and headings, and
+  use `.leftToRight` for `.bullet`, `.numbered` and `.quote` so the "• "
+  glyph and number stay on the left. Elsewhere SwiftUI's `Text` and
+  `TextField` already follow the layout direction (left in an English UI);
+  check on a device that Hebrew titles in the Assignments and Exams rows,
+  the subject list and the form fields start on the left, and add
+  `.multilineTextAlignment(.leading)` and `.frame(maxWidth: .infinity,
+  alignment: .leading)` where one doesn't.
 
 ## Working on the web app
 
