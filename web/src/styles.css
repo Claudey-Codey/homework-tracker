@@ -746,20 +746,20 @@ button.cell {
   font-weight: 600;
 }
 
-/* An exam's score, circled in red like a mark on a test paper. Grows into a
-   capsule for longer scores such as "18/20". */
+/* An exam's score, circled in red like a mark on a test paper: an oval a
+   little wider than tall, which stretches for longer scores such as "18/20". */
 .score-circle {
-  align-self: flex-start;
-  min-width: 30px;
-  height: 30px;
-  padding: 0 7px;
+  flex-shrink: 0;
+  min-width: 52px;
+  height: 40px;
+  padding: 0 10px;
   border: 2px solid var(--red);
-  border-radius: 15px;
+  border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: var(--red);
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 700;
   white-space: nowrap;
 }

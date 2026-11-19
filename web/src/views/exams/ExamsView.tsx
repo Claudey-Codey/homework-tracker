@@ -94,13 +94,6 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
           <span className="caption secondary" dir="auto">{subject.name}</span>
         )}
 
-        {/* Only once there's a score: an exam without one shows nothing here. */}
-        {score && (
-          <span className="score-circle" dir="auto" aria-label={`Score: ${score}`}>
-            {score}
-          </span>
-        )}
-
         {/* What's attached, as counts, the same as on an assignment's row. */}
         {(noteCount > 0 || imageCount > 0 || pdfCount > 0) && (
           <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -125,6 +118,14 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
           </span>
         )}
       </div>
+
+      {/* Circled on the right, like a mark on a test paper. Only once there's
+          a score: an exam without one shows nothing here. */}
+      {score && (
+        <span className="score-circle" dir="auto" aria-label={`Score: ${score}`}>
+          {score}
+        </span>
+      )}
 
       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
         <span className="subheadline" style={{ fontWeight: 600, color: examDateColor(exam.date) }}>

@@ -159,14 +159,14 @@ Web: `Exam.score` in `db.ts`, `ExamForm.tsx`, `ExamRow` in
   kept and restored with the rest, and a form with only a score typed counts
   as not empty.
 - In the Exams list (`Views/Exams/ExamsView.swift`), an exam with a score
-  shows it circled in red, like a mark on a test paper, under the title (and
-  subject) and above the counts line: just the score, no "Score:" label, in
-  red, 13 pt bold, inside a 2 pt red outline, 30 pt tall and at least 30 pt
-  wide, with 7 pt padding on each side so a longer score ("18/20") stretches
-  it into a capsule. Left-aligned in the row, not stretched. SwiftUI:
-  `Text(score).font(.system(size: 13, weight: .bold)).foregroundStyle(.red)
-  .padding(.horizontal, 7).frame(minWidth: 30, minHeight: 30)
-  .overlay(Capsule().stroke(.red, lineWidth: 2))`, with
+  shows it circled in red, like a mark on a test paper, on the right of the
+  row, between the title column and the date, vertically centred: just the
+  score, no "Score:" label, red, 17 pt bold, inside a 2 pt red oval outline,
+  40 pt tall and at least 52 pt wide, with 10 pt padding on each side so a
+  longer score ("18/20") stretches the oval. SwiftUI:
+  `Text(score).font(.system(size: 17, weight: .bold)).foregroundStyle(.red)
+  .padding(.horizontal, 10).frame(minWidth: 52, minHeight: 40)
+  .overlay(Ellipse().stroke(.red, lineWidth: 2)).fixedSize()`, with
   `.accessibilityLabel("Score: \(score)")`. With no score nothing is shown.
 - Backups include the score automatically, as part of the exam.
 
