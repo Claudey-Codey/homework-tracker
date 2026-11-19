@@ -215,7 +215,7 @@ function AssignmentFormBody({ assignment, onReset }: { assignment?: Assignment; 
                 onChange={setSubjectId}
               />
             ) : (
-              <Row className="disabled">No subjects yet. Add them in the Subjects tab.</Row>
+              <Row className="disabled">No subjects yet. Add them in Account, under Subjects.</Row>
             )}
           </Section>
 

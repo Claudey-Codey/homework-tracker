@@ -123,7 +123,7 @@ function ExamFormBody({ exam, onReset }: { exam?: Exam; onReset: () => void }) {
                 onChange={setSubjectId}
               />
             ) : (
-              <Row className="disabled">No subjects yet. Add them in the Subjects tab.</Row>
+              <Row className="disabled">No subjects yet. Add them in Account, under Subjects.</Row>
             )}
             <DateRow label="Date" value={date} onChange={setDate} />
             <ToggleRow label="Set a time" isOn={hasTime} onChange={setHasTime} />

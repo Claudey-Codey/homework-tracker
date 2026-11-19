@@ -185,3 +185,28 @@ Web: `Exam.score` in `db.ts`, `ExamForm.tsx`, `ExamRow` in
   projection (a tilted A4 rectangle through a pinhole camera), not by placing
   corners by hand, or the straightened page's proportions can't be checked.
 - Comments use `///` above declarations and explain why, in plain sentences.
+
+### 7. Subjects moves from the tab bar into Account
+
+Web: `App.tsx`, `views/account/AccountView.tsx`,
+`views/subjects/SubjectsView.tsx`, and the subject pickers in
+`AssignmentForm.tsx` and `ExamForm.tsx`.
+
+- The tab bar has three tabs: Assignments, Exams, Account. Subjects is no
+  longer a tab. iOS: remove the `SubjectsView` tab from
+  `Views/RootTabView.swift` and renumber the Account tag (and anything that
+  selects it) from 3 to 2.
+- Account's row of links is now Edit Account, **Subjects**, Settings, in that
+  order, in the same section. Subjects uses the `books.vertical` symbol and
+  pushes the Subjects page (`NavigationLink`, in
+  `Views/Account/AccountView.swift`).
+- The Subjects page (`Views/Subjects/SubjectsView.swift`) is pushed, so it
+  loses its own `NavigationStack` and gets the usual Back button. Its Edit
+  button moves to the trailing side, before +, since Back holds the leading
+  spot. Everything else (large title "Subjects", the empty state, swipe to
+  delete, toggles, add/edit sheet) is unchanged.
+- In the New/Edit Assignment and Exam forms, the disabled row shown when
+  there are no subjects now reads "No subjects yet. Add them in Account,
+  under Subjects." (`AssignmentFormView.swift`, `ExamFormView.swift`).
+- With item 5, leaving the Account tab also leaves the Subjects page, so
+  coming back shows Account.

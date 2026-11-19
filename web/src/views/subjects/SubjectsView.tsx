@@ -14,6 +14,7 @@ import { Toggle, ToggleRow } from "../../ui/Toggle";
 import { useSubjects } from "../useSubjects";
 import { TextField } from "../../ui/TextField";
 
+/// Opened from Account. Back takes the leading spot, so Edit sits next to +.
 export function SubjectsView() {
   const subjects = useSubjects();
   const [showingAdd, setShowingAdd] = useState(false);
@@ -29,23 +30,23 @@ export function SubjectsView() {
       title="Subjects"
       large
       plain={isEmpty}
-      leading={
-        !isEmpty && (
-          <GlassButton
-            prominent={editMode}
-            onClick={() => {
-              setEditMode(!editMode);
-              setConfirming(null);
-            }}
-          >
-            {editMode ? "Done" : "Edit"}
-          </GlassButton>
-        )
-      }
       trailing={
-        <GlassButton onClick={() => setShowingAdd(true)} label="Add Subject">
-          <PlusIcon size={24} strokeWidth={2} />
-        </GlassButton>
+        <>
+          {!isEmpty && (
+            <GlassButton
+              prominent={editMode}
+              onClick={() => {
+                setEditMode(!editMode);
+                setConfirming(null);
+              }}
+            >
+              {editMode ? "Done" : "Edit"}
+            </GlassButton>
+          )}
+          <GlassButton onClick={() => setShowingAdd(true)} label="Add Subject">
+            <PlusIcon size={24} strokeWidth={2} />
+          </GlassButton>
+        </>
       }
       overlay={
         isEmpty && (
