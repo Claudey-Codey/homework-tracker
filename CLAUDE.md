@@ -186,7 +186,7 @@ Web: `Exam.score` in `db.ts`, `ExamForm.tsx`, `ExamRow` in
   corners by hand, or the straightened page's proportions can't be checked.
 - Comments use `///` above declarations and explain why, in plain sentences.
 
-### 7. Subjects moves from the tab bar into Account
+### 9. Subjects moves from the tab bar into Account
 
 Web: `App.tsx`, `views/account/AccountView.tsx`,
 `views/subjects/SubjectsView.tsx`, and the subject pickers in
