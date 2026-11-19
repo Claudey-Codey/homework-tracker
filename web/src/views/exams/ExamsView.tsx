@@ -119,11 +119,18 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
-        <span className="subheadline" style={{ fontWeight: 600, color: urgencyColor(exam.date, false) }}>
+        <span className="subheadline" style={{ fontWeight: 600, color: examDateColor(exam.date) }}>
           {formatMonthDay(exam.date)}
         </span>
         {exam.hasTime && <span className="caption2 secondary">{formatTime(exam.date)}</span>}
       </div>
     </div>
   );
+}
+
+/// Like an assignment's due date, but a past exam is green rather than red:
+/// it's over, not something left undone.
+function examDateColor(date: number, now = new Date()): string {
+  if (date < now.getTime()) return "var(--green)";
+  return urgencyColor(date, false, now);
 }

@@ -136,6 +136,17 @@ Web: `selectTab` in `App.tsx`, `popToRoot` in `ui/NavStack.tsx`.
   equals the current one, empty that tab's path (inside `withAnimation`).
   Otherwise empty the path of the tab being left.
 
+### 6. Past exams' dates are green
+
+Web: `examDateColor` in `views/exams/ExamsView.tsx`.
+
+In the Exams list, an exam whose date and time have passed shows its date in
+green (`.green`) instead of red. Everything else is unchanged: orange within
+two days, the normal text colour further out, the time line stays secondary.
+Assignments keep red for overdue. iOS: in `Views/Exams/ExamsView.swift`, use
+`.green` for the exam row's date when `exam.date < .now`, and
+`urgencyColor(for:isDone:)` otherwise.
+
 (The web also fixed a bug where swiping down a note opened from a New
 Assignment or New Exam form closed the form too. SwiftUI's nested sheets
 don't have that problem, so there's nothing to port.)
