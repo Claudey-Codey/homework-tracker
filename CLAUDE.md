@@ -164,16 +164,14 @@ Web: `Exam.score` and `examScore` in `db.ts`, `ExamForm.tsx` (`scoreInput`),
   kept and restored with the rest, and a form with only a score typed counts
   as not empty.
 - In the Exams list (`Views/Exams/ExamsView.swift`), an exam with a score
-  shows just the number (no "/100", no "Score:") circled in red, like a mark
-  on a test paper, on the right of the row between the title column and the
-  date, vertically centred: a round 36 pt circle with a 2 pt red outline, the
-  number red, bold, 16 pt (12 pt for 100, so three digits fit), in the exact
-  middle of the circle. SwiftUI: `Text("\(score)").font(.system(size: score
-  == 100 ? 12 : 16, weight: .bold)).monospacedDigit().foregroundStyle(.red)
-  .frame(width: 36, height: 36).overlay(Circle().stroke(.red, lineWidth:
-  2))`, with `.accessibilityLabel("Score: \(score) out of 100")`. Check on a
-  device that the digits look centred; nudge with `.offset(y:)` if SF's
-  digits sit high. With no score nothing is shown.
+  shows just the number (no "/100", no "Score:", no circle or other shape
+  around it) in red, like a mark on a test paper, on the right of the row
+  between the title column and the date, vertically centred: 16 pt bold,
+  monospaced digits, centred in a fixed 36 pt wide slot so one-, two- and
+  three-digit scores line up. SwiftUI: `Text("\(score)").font(.system(size:
+  16, weight: .bold)).monospacedDigit().foregroundStyle(.red).frame(width:
+  36)`, with `.accessibilityLabel("Score: \(score) out of 100")`. With no
+  score nothing is shown.
 - The date column on the right of an exam's row has a fixed minimum width
   (58 pt, right-aligned), so the score circles line up in one column from
   row to row whatever the date's width: `.frame(minWidth: 58, alignment:

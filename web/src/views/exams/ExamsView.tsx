@@ -119,15 +119,15 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
         )}
       </div>
 
-      {/* Circled on the right, like a mark on a test paper. Only once there's
+      {/* On the right, in red like a mark on a test paper. Only once there's
           a score: an exam without one shows nothing here. */}
       {score !== null && (
-        <span className={score === 100 ? "score-circle full" : "score-circle"} aria-label={`Score: ${score} out of 100`}>
+        <span className="score-mark" aria-label={`Score: ${score} out of 100`}>
           {score}
         </span>
       )}
 
-      {/* A fixed width, so the score circles line up from row to row whatever
+      {/* A fixed width, so the scores line up from row to row whatever
           the date's width. */}
       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, minWidth: 58, flexShrink: 0 }}>
         <span className="subheadline" style={{ fontWeight: 600, color: examDateColor(exam.date) }}>
