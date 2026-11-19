@@ -50,6 +50,18 @@ export interface ImageAttachment {
   type?: string;
 }
 
+/// An exam's score out of 100, or null for none. Also reads the free-text
+/// scores saved before scores were out of 100: "88" is 88, and "18/20"
+/// becomes 90.
+export function examScore(exam: Exam): number | null {
+  const { score } = exam;
+  if (score === undefined || score === "") return null;
+  if (typeof score === "number") return score;
+  const fraction = score.match(/^\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)\s*$/);
+  const value = fraction ? (Number(fraction[1]) / Number(fraction[2])) * 100 : parseFloat(score);
+  return Number.isFinite(value) ? Math.min(100, Math.max(0, Math.round(value))) : null;
+}
+
 export const isPdf = (attachment: ImageAttachment) => attachment.type === "application/pdf";
 
 export const imageKey = (id: string) => `image:${id}`;
@@ -83,10 +95,11 @@ export interface Exam {
   /// Attached pictures and PDFs. Missing on records from before images existed.
   images?: ImageAttachment[];
   reminders: Reminder[];
-  /// The mark you got, as typed: "92", "18/20", "A-". Free text because
-  /// schools grade in different ways. Missing or empty means no score yet,
-  /// and the exam's row then shows nothing for it.
-  score?: string;
+  /// The mark you got out of 100, a whole number from 0 to 100. Missing
+  /// means no score yet, and the exam's row then shows nothing for it.
+  /// Exams saved while the score was free text hold a string; read it with
+  /// `examScore`.
+  score?: number | string;
   createdAt: number;
 }
 

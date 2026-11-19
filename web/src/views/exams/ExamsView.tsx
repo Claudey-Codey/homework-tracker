@@ -1,8 +1,8 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
-import { db, deleteExam, isPdf, type Exam, type Subject } from "../../db";
+import { db, deleteExam, examScore, isPdf, type Exam, type Subject } from "../../db";
 import { formatMonthDay, formatTime } from "../../support/dates";
-import { urgencyColor } from "../../support/due";
+import { examDateColor } from "../../support/due";
 import { noSubjectHex } from "../../support/theme";
 import { ContentUnavailable } from "../../ui/ContentUnavailable";
 import { GlassButton } from "../../ui/GlassButton";
@@ -81,7 +81,7 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
   const noteCount = exam.notes.length;
   const pdfCount = exam.images?.filter(isPdf).length ?? 0;
   const imageCount = (exam.images?.length ?? 0) - pdfCount;
-  const score = exam.score?.trim() ?? "";
+  const score = examScore(exam);
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "10px 0" }}>
@@ -92,13 +92,6 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
 
         {subject && exam.title && (
           <span className="caption secondary" dir="auto">{subject.name}</span>
-        )}
-
-        {/* Only once there's a score: an exam without one shows nothing here. */}
-        {score && (
-          <span className="caption" style={{ fontWeight: 600 }} dir="auto">
-            Score: {score}
-          </span>
         )}
 
         {/* What's attached, as counts, the same as on an assignment's row. */}
@@ -126,8 +119,18 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
         )}
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
-        <span className="subheadline" style={{ fontWeight: 600, color: urgencyColor(exam.date, false) }}>
+      {/* On the right, in red like a mark on a test paper. Only once there's
+          a score: an exam without one shows nothing here. */}
+      {score !== null && (
+        <span className="score-mark" aria-label={`Score: ${score} out of 100`}>
+          {score}
+        </span>
+      )}
+
+      {/* A fixed width, so the scores line up from row to row whatever
+          the date's width. */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, minWidth: 58, flexShrink: 0 }}>
+        <span className="subheadline" style={{ fontWeight: 600, color: examDateColor(exam.date) }}>
           {formatMonthDay(exam.date)}
         </span>
         {exam.hasTime && <span className="caption2 secondary">{formatTime(exam.date)}</span>}

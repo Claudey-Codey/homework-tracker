@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { db, type Exam, type Reminder } from "../../db";
+import { db, examScore, type Exam, type Reminder } from "../../db";
 import { defaultExamDate, endOfDay } from "../../support/dates";
 import { newId } from "../../support/id";
 import { useKeepDraft, useRestoredDraft } from "../../support/formDraft";
@@ -25,6 +25,7 @@ type ExamDraft = {
   hasTime: boolean;
   subjectId: string;
   reminders: Reminder[];
+  /// The score field's digits, "" when empty.
   score: string;
 };
 
@@ -49,7 +50,11 @@ function ExamFormBody({ exam, onReset }: { exam?: Exam; onReset: () => void }) {
   const [hasTime, setHasTime] = useState(draft?.hasTime ?? exam?.hasTime ?? false);
   const [subjectId, setSubjectId] = useState(draft?.subjectId ?? exam?.subjectId ?? "");
   const [reminders, setReminders] = useState<Reminder[]>(draft?.reminders ?? exam?.reminders ?? []);
-  const [score, setScore] = useState(draft?.score ?? exam?.score ?? "");
+  const [score, setScore] = useState(() => {
+    if (draft) return draft.score;
+    const saved = exam ? examScore(exam) : null;
+    return saved === null ? "" : String(saved);
+  });
 
   const { showReset, discard } = useKeepDraft<ExamDraft>({
     key: draftKey,
@@ -58,7 +63,7 @@ function ExamFormBody({ exam, onReset }: { exam?: Exam; onReset: () => void }) {
     values: { title, notes, images, date, hasTime, subjectId, reminders, score },
     isEmpty:
       title.trim() === "" &&
-      score.trim() === "" &&
+      score === "" &&
       subjectId === "" &&
       !hasTime &&
       date.getTime() === defaultExamDate().getTime() &&
@@ -85,7 +90,7 @@ function ExamFormBody({ exam, onReset }: { exam?: Exam; onReset: () => void }) {
       notes: finalizeNotes(notes, exam?.notes),
       images: savedImages,
       reminders,
-      score: score.trim() || undefined,
+      score: score === "" ? undefined : Number(score),
       createdAt: exam?.createdAt ?? Date.now(),
     });
     discard();
@@ -130,15 +135,20 @@ function ExamFormBody({ exam, onReset }: { exam?: Exam; onReset: () => void }) {
             {hasTime && <TimeRow label="Time" value={date} onChange={setDate} />}
           </Section>
 
-          <Section header="Score" footer="Shown on the exam in the Exams list. Leave it empty until you get your result.">
+          <Section
+            header="Score"
+            footer="Out of 100. Shown on the exam in the Exams list. Leave it empty until you get your result."
+          >
             <Row>
               <TextField
-                placeholder="e.g. 92, 18/20 or A"
+                placeholder="e.g. 88"
                 aria-label="Score"
+                inputMode="numeric"
                 value={score}
-                onChange={(event) => setScore(event.target.value)}
+                onChange={(event) => setScore(scoreInput(event.target.value, score))}
                 enterKeyHint="done"
               />
+              <span className="secondary">/ 100</span>
             </Row>
           </Section>
 
@@ -156,4 +166,11 @@ function ExamFormBody({ exam, onReset }: { exam?: Exam; onReset: () => void }) {
       </SheetBody>
     </>
   );
+}
+
+/// Keeps the score field to a whole number from 0 to 100: anything but
+/// digits is dropped, and a keystroke that would go past 100 is ignored.
+function scoreInput(typed: string, previous: string): string {
+  const digits = typed.replace(/\D/g, "").replace(/^0+(?=\d)/, "");
+  return digits === "" || Number(digits) <= 100 ? digits : previous;
 }

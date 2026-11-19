@@ -140,29 +140,112 @@ Web: `selectTab` in `App.tsx`, `popToRoot` in `ui/NavStack.tsx`.
 Assignment or New Exam form closed the form too. SwiftUI's nested sheets
 don't have that problem, so there's nothing to port.)
 
-### 6. Exam score
+### 6. Exam score out of 100
 
-Web: `Exam.score` in `db.ts`, `ExamForm.tsx`, `ExamRow` in
-`views/exams/ExamsView.tsx`.
+Web: `Exam.score` and `examScore` in `db.ts`, `ExamForm.tsx` (`scoreInput`),
+`ExamRow` in `views/exams/ExamsView.tsx`.
 
-- An exam has an optional score, kept as free text exactly as typed ("92",
-  "18/20", "A-"), because schools grade in different ways. iOS: add
-  `var score: String?` to the `Exam` model (optional, so existing stores
-  migrate without a default).
+- An exam has an optional score out of 100: a whole number from 0 to 100.
+  iOS: add `var score: Int?` to the `Exam` model (optional, so existing
+  stores migrate without a default). (On the web, exams saved during an
+  earlier free-text version may hold a string; `examScore` reads "88" as 88
+  and "18/20" as 90. iOS never had the free-text version, so it needs none
+  of that.)
 - New and Edit Exam forms (`Views/Exams/ExamFormView.swift`) get a section
-  between "Exam" and "Study material": header "Score", one `TextField` with
-  the placeholder "e.g. 92, 18/20 or A", and the footer "Shown on the exam in
-  the Exams list. Leave it empty until you get your result."
-- On Save the text is trimmed; an empty result is stored as `nil`, so
-  clearing the field removes the score.
+  between "Exam" and "Study material": header "Score", one row with a
+  `TextField` (placeholder "e.g. 88", `.keyboardType(.numberPad)`) and
+  secondary text "/ 100" on the right, and the footer "Out of 100. Shown on
+  the exam in the Exams list. Leave it empty until you get your result."
+- The field only takes digits: anything else is dropped, leading zeros are
+  removed ("095" → "95"), and a keystroke that would make it more than 100 is
+  ignored (typing "125" leaves "12"). Filter in `.onChange(of:)`.
+- On Save an empty field stores `nil`, so clearing it removes the score.
 - The score is part of a New Exam's 5-second draft (backlog item 2): it's
   kept and restored with the rest, and a form with only a score typed counts
   as not empty.
 - In the Exams list (`Views/Exams/ExamsView.swift`), an exam with a score
-  shows a line "Score: 18/20" under the title (and subject), above the counts
-  line: caption size, semibold, primary colour. With no score the line isn't
-  there at all.
+  shows just the number (no "/100", no "Score:", no circle or other shape
+  around it) in red, like a mark on a test paper, on the right of the row
+  between the title column and the date, vertically centred: 16 pt bold,
+  monospaced digits, centred in a fixed 36 pt wide slot so one-, two- and
+  three-digit scores line up. SwiftUI: `Text("\(score)").font(.system(size:
+  16, weight: .bold)).monospacedDigit().foregroundStyle(.red).frame(width:
+  36)`, with `.accessibilityLabel("Score: \(score) out of 100")`. With no
+  score nothing is shown.
+- The date column on the right of an exam's row has a fixed minimum width
+  (58 pt, right-aligned), so the score circles line up in one column from
+  row to row whatever the date's width: `.frame(minWidth: 58, alignment:
+  .trailing)`.
 - Backups include the score automatically, as part of the exam.
+
+### 7. Past exams' dates are green
+
+Web: `examDateColor` in `support/due.ts`, used by `ExamRow` in
+`views/exams/ExamsView.tsx`.
+
+- In the Exams list, an exam whose date has passed shows its date in green
+  (`.green`) instead of red: a past exam is done, not overdue.
+- Before that nothing changes: orange within two days, primary colour
+  otherwise. An exam without a time is stored at the end of its day, so it
+  turns green the day after.
+- Assignments are unchanged: overdue ones stay red.
+- iOS: add `examDateColor(for:now:)` next to `urgencyColor` in
+  `Support/DueDateUrgency.swift` (green when `date < now`, else
+  `urgencyColor(for: date, isDone: false, now: now)`), and use it for the
+  date in `Views/Exams/ExamsView.swift` (line with
+  `urgencyColor(for: exam.date, isDone: false)`).
+
+### 8. Custom subject colour
+
+Web: `CustomSwatch` in `ui/Swatches.tsx` (`allowsCustom`), used by
+`SubjectForm` in `views/subjects/SubjectsView.tsx`.
+
+- New and Edit Subject keep all 11 palette colours and add a 12th circle at
+  the end of the Color grid: a colour wheel (rainbow). Tapping it opens the
+  system colour picker; the colour chosen there becomes the subject's colour.
+- While the subject's colour isn't one of the palette colours, the rainbow
+  circle is the selected one: a rainbow ring around a smaller circle of the
+  chosen colour, with the white checkmark. Picking a palette colour again
+  moves the selection back to that colour.
+- An existing subject whose colour isn't in the palette opens with the
+  rainbow circle selected.
+- Stored like any other colour: `colorHex` as "#RRGGBB", upper case, no
+  opacity.
+- iOS (`Views/Subjects/SubjectsView.swift`): after the `ForEach` in the
+  Color grid, add `ColorPicker("Custom color", selection:,
+  supportsOpacity: false).labelsHidden()` (it draws the rainbow circle and
+  presents the picker itself), bound to a `Binding<Color>` that reads
+  `Color(hex: colorHex)` and writes back a hex string. Add the Color → hex
+  conversion to `Support/Color+Hex.swift` (via `UIColor(color).getRed(…)`).
+  Show the chosen colour and checkmark over it when `colorHex` isn't in
+  `SubjectPalette.colors`, letting taps through (`.allowsHitTesting(false)`).
+
+### 9. Hebrew and English text both start on the left
+
+Web: the `[dir="auto"]` and `.navbar-title` rules in `styles.css`, and
+`AutoDirection` in `views/exams/StudyNoteEditor.tsx`.
+
+- Every piece of text the user types starts on the left, whatever its
+  language, like Google Docs: titles and subjects in the lists, text fields,
+  and every line of a note. Before, Hebrew lines sat on the right.
+- The letters and punctuation must still read correctly: each line keeps its
+  own reading direction (taken from its first letter), so "מלכים פרק א' + פרק
+  ג'" keeps its apostrophes and plus in place; only the alignment changes.
+- In notes, bullets, numbers and the quote bar always sit on the left, even on
+  a Hebrew line.
+- Titles that are centred (navigation bar, alerts) stay centred, but a Hebrew
+  title keeps its own reading direction there too, so the apostrophe at the
+  end of "סיכום פרק א'" doesn't jump to the wrong side.
+- iOS: in `Support/MarkdownStyler.swift`, `paragraphStyle(for:)` sets
+  `alignment = .natural` ("Hebrew right, English left"). Change it to
+  `.left`, keep `baseWritingDirection = .natural` for body and headings, and
+  use `.leftToRight` for `.bullet`, `.numbered` and `.quote` so the "• "
+  glyph and number stay on the left. Elsewhere SwiftUI's `Text` and
+  `TextField` already follow the layout direction (left in an English UI);
+  check on a device that Hebrew titles in the Assignments and Exams rows,
+  the subject list and the form fields start on the left, and add
+  `.multilineTextAlignment(.leading)` and `.frame(maxWidth: .infinity,
+  alignment: .leading)` where one doesn't.
 
 ## Working on the web app
 

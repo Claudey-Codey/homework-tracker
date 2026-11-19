@@ -26,3 +26,11 @@ export function urgencyColor(date: number, isDone: boolean, now = new Date()): s
   if (date <= addDays(now, 2).getTime()) return "var(--orange)";
   return "var(--label)";
 }
+
+/// An exam that's behind you is done, not late, so its date turns green
+/// rather than red. Before then it warns like an assignment: orange within
+/// two days. Date-only exams count as past from the day after.
+export function examDateColor(date: number, now = new Date()): string {
+  if (date < now.getTime()) return "var(--green)";
+  return urgencyColor(date, false, now);
+}
