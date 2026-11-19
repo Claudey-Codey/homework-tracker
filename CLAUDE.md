@@ -140,34 +140,39 @@ Web: `selectTab` in `App.tsx`, `popToRoot` in `ui/NavStack.tsx`.
 Assignment or New Exam form closed the form too. SwiftUI's nested sheets
 don't have that problem, so there's nothing to port.)
 
-### 6. Exam score
+### 6. Exam score out of 100
 
-Web: `Exam.score` in `db.ts`, `ExamForm.tsx`, `ExamRow` in
-`views/exams/ExamsView.tsx`.
+Web: `Exam.score` and `examScore` in `db.ts`, `ExamForm.tsx` (`scoreInput`),
+`ExamRow` in `views/exams/ExamsView.tsx`.
 
-- An exam has an optional score, kept as free text exactly as typed ("92",
-  "18/20", "A-"), because schools grade in different ways. iOS: add
-  `var score: String?` to the `Exam` model (optional, so existing stores
-  migrate without a default).
+- An exam has an optional score out of 100: a whole number from 0 to 100.
+  iOS: add `var score: Int?` to the `Exam` model (optional, so existing
+  stores migrate without a default). (On the web, exams saved during an
+  earlier free-text version may hold a string; `examScore` reads "88" as 88
+  and "18/20" as 90. iOS never had the free-text version, so it needs none
+  of that.)
 - New and Edit Exam forms (`Views/Exams/ExamFormView.swift`) get a section
-  between "Exam" and "Study material": header "Score", one `TextField` with
-  the placeholder "e.g. 92, 18/20 or A", and the footer "Shown on the exam in
-  the Exams list. Leave it empty until you get your result."
-- On Save the text is trimmed; an empty result is stored as `nil`, so
-  clearing the field removes the score.
+  between "Exam" and "Study material": header "Score", one row with a
+  `TextField` (placeholder "e.g. 88", `.keyboardType(.numberPad)`) and
+  secondary text "/ 100" on the right, and the footer "Out of 100. Shown on
+  the exam in the Exams list. Leave it empty until you get your result."
+- The field only takes digits: anything else is dropped, leading zeros are
+  removed ("095" → "95"), and a keystroke that would make it more than 100 is
+  ignored (typing "125" leaves "12"). Filter in `.onChange(of:)`.
+- On Save an empty field stores `nil`, so clearing it removes the score.
 - The score is part of a New Exam's 5-second draft (backlog item 2): it's
   kept and restored with the rest, and a form with only a score typed counts
   as not empty.
 - In the Exams list (`Views/Exams/ExamsView.swift`), an exam with a score
-  shows it circled in red, like a mark on a test paper, on the right of the
-  row, between the title column and the date, vertically centred: just the
-  score, no "Score:" label, red, 17 pt bold, inside a 2 pt red oval outline,
-  40 pt tall and at least 52 pt wide, with 10 pt padding on each side so a
-  longer score ("18/20") stretches the oval. SwiftUI:
-  `Text(score).font(.system(size: 17, weight: .bold)).foregroundStyle(.red)
-  .padding(.horizontal, 10).frame(minWidth: 52, minHeight: 40)
-  .overlay(Ellipse().stroke(.red, lineWidth: 2)).fixedSize()`, with
-  `.accessibilityLabel("Score: \(score)")`. With no score nothing is shown.
+  shows just the number (no "/100", no "Score:") circled in red, like a mark
+  on a test paper, on the right of the row between the title column and the
+  date, vertically centred: a round 44 pt circle with a 2 pt red outline, the
+  number red, bold, 17 pt (14 pt for 100, so three digits fit). SwiftUI:
+  `Text("\(score)").font(.system(size: score == 100 ? 14 : 17, weight:
+  .bold)).monospacedDigit().foregroundStyle(.red).frame(width: 44, height:
+  44).overlay(Circle().stroke(.red, lineWidth: 2))`, with
+  `.accessibilityLabel("Score: \(score) out of 100")`. With no score nothing
+  is shown.
 - Backups include the score automatically, as part of the exam.
 
 ### 7. Past exams' dates are green

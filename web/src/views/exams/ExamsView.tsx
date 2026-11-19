@@ -1,6 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
-import { db, deleteExam, isPdf, type Exam, type Subject } from "../../db";
+import { db, deleteExam, examScore, isPdf, type Exam, type Subject } from "../../db";
 import { formatMonthDay, formatTime } from "../../support/dates";
 import { examDateColor } from "../../support/due";
 import { noSubjectHex } from "../../support/theme";
@@ -81,7 +81,7 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
   const noteCount = exam.notes.length;
   const pdfCount = exam.images?.filter(isPdf).length ?? 0;
   const imageCount = (exam.images?.length ?? 0) - pdfCount;
-  const score = exam.score?.trim() ?? "";
+  const score = examScore(exam);
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "10px 0" }}>
@@ -121,8 +121,8 @@ function ExamRow({ exam, subject }: { exam: Exam; subject?: Subject }) {
 
       {/* Circled on the right, like a mark on a test paper. Only once there's
           a score: an exam without one shows nothing here. */}
-      {score && (
-        <span className="score-circle" dir="auto" aria-label={`Score: ${score}`}>
+      {score !== null && (
+        <span className={score === 100 ? "score-circle full" : "score-circle"} aria-label={`Score: ${score} out of 100`}>
           {score}
         </span>
       )}
