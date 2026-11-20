@@ -284,6 +284,25 @@ Web: `App.tsx`, `views/account/AccountView.tsx`,
 - With item 5, leaving the Account tab also leaves the Subjects page, so
   coming back shows Account.
 
+### 11. Tab switch animation
+
+Web: `selectTab` in `App.tsx`, `.tab-pane.entering` and `.tab-highlight` in
+`styles.css`.
+
+- Switching tabs cross-fades the pages: the tab being opened fades in
+  (0.22 s, ease-out) over the one being left, which stays still underneath.
+- The tab bar's grey selected-tab highlight slides to the tapped tab (0.4 s
+  spring) and swells slightly on the way, like iOS 26's tab bar but without
+  the Liquid Glass lens. It doesn't swell when the app opens.
+- The tab being left goes back to its first page (item 5) only after the
+  fade, so it doesn't visibly jump during it. Tapping the tab you're on still
+  pops to its first page with the Back animation and no fade.
+- iOS: nothing to write. The system `TabView` already cross-fades tab
+  content on iOS 18 and later and slides the selection on iOS 26; iOS 17
+  switches instantly, which is fine. Don't add a custom tab bar for it. Check
+  on a device that item 5's path reset doesn't show during the fade; if it
+  does, empty the left tab's path after a short delay (about 0.25 s).
+
 ## Working on the web app
 
 - Run commands in `web/`: `npm ci`, `npm run dev`, `npm run typecheck`, and

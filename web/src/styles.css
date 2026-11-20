@@ -199,6 +199,13 @@ svg {
   pointer-events: none;
 }
 
+/* The tab being opened fades in over the one being left, which stays put
+   underneath until the fade ends: UITabBarController's cross-dissolve. */
+.tab-pane.entering {
+  z-index: 1;
+  animation: fade-in 0.22s ease-out both;
+}
+
 .screen {
   position: absolute;
   inset: 0;
@@ -966,7 +973,30 @@ button.cell {
 
 .tab.selected {
   color: var(--accent);
+}
+
+/* The selected tab's highlight, one tab wide, slides to the tab that's
+   tapped and swells on the way, like iOS 26's tab bar without the glass
+   lens. */
+.tab-highlight-slot {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / 3);
+  transition: transform 0.4s var(--spring);
+  pointer-events: none;
+}
+
+.tab-highlight {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
   background: var(--fill-3);
+}
+
+.tab-highlight.swell {
+  animation: swell 0.4s ease;
 }
 
 .tab:active {

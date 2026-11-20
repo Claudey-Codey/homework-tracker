@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { requestPersistentStorage } from "./db";
 import { configureAudioSession, prepareFeedback } from "./support/feedback";
 import { keys, useSetting } from "./support/settings";
@@ -21,10 +21,15 @@ function onAccentColor(hex: string): string {
 const tabs = ["assignments", "exams", "account"] as const;
 type Tab = (typeof tabs)[number];
 
+/// How long the tab being opened takes to fade in over the one being left,
+/// matching `.tab-pane.entering` in styles.css.
+const tabFadeDuration = 220;
+
 /// The three tabs, each with its own navigation stack. As on iOS, tapping the
 /// tab you're on goes back to its first screen; leaving a tab also sends it
 /// back there, so coming back to Account shows Account, not the page that was
-/// open before.
+/// open before. Switching tabs cross-fades the pages and slides the tab bar's
+/// highlight across, as UITabBarController does.
 export function App() {
   const [accentHex] = useSetting(keys.accent, defaultAccentHex);
   const [appearance] = useSetting<ThemeAppearance>(keys.appearance, "system");
@@ -32,15 +37,45 @@ export function App() {
   const [selected, setSelected] = useState<Tab>("assignments");
   const [popRequests, setPopRequests] = useState<Partial<Record<Tab, PopToRootRequest>>>({});
 
-  const selectTab = (tab: Tab) => {
-    // The tab being tapped if it's already showing, or the one being left.
-    const target = tab === selected ? tab : selected;
+  // The tab fading out underneath the one being opened, while it does.
+  const [leaving, setLeaving] = useState<Tab | null>(null);
+  const pendingReset = useRef<{ tab: Tab; timer: number } | null>(null);
+  // The highlight only swells once a tab has been switched, not on launch.
+  const hasSwitched = useRef(false);
+
+  const popToRoot = (tab: Tab, animated: boolean) =>
     setPopRequests((current) => ({
       ...current,
-      [target]: { id: (current[target]?.id ?? 0) + 1, animated: tab === selected },
+      [tab]: { id: (current[tab]?.id ?? 0) + 1, animated },
     }));
+
+  const selectTab = (tab: Tab) => {
+    if (tab === selected) {
+      popToRoot(tab, true);
+      return;
+    }
+    // The tab being left goes back to its first page once it has faded out,
+    // so it doesn't visibly jump there during the fade. A tab left by an
+    // earlier, unfinished switch resets now, unless it's being reopened.
+    const pending = pendingReset.current;
+    if (pending) {
+      window.clearTimeout(pending.timer);
+      if (pending.tab !== tab) popToRoot(pending.tab, false);
+    }
+    const left = selected;
+    hasSwitched.current = true;
+    pendingReset.current = {
+      tab: left,
+      timer: window.setTimeout(() => {
+        pendingReset.current = null;
+        setLeaving(null);
+        popToRoot(left, false);
+      }, tabFadeDuration),
+    };
+    setLeaving(left);
     setSelected(tab);
   };
+  useEffect(() => () => window.clearTimeout(pendingReset.current?.timer), []);
   const { avatar } = useAccount();
 
   // `.tint(...)` and `.preferredColorScheme(...)` for the whole app.
@@ -88,12 +123,24 @@ export function App() {
   return (
     <div className="app">
       {tabs.map((tab) => (
-        <div key={tab} className="tab-pane" hidden={tab !== selected}>
+        <div
+          key={tab}
+          className={tab === selected && leaving !== null ? "tab-pane entering" : "tab-pane"}
+          hidden={tab !== selected && tab !== leaving}
+        >
           <NavStack root={roots[tab]} popToRoot={popRequests[tab]} />
         </div>
       ))}
 
       <nav className={showTabLabels ? "tabbar glass" : "tabbar glass icons-only"}>
+        <span
+          className="tab-highlight-slot"
+          style={{ transform: `translateX(${tabs.indexOf(selected) * 100}%)` }}
+          aria-hidden="true"
+        >
+          {/* Keyed by tab so the swell replays on every move. */}
+          <span key={selected} className={hasSwitched.current ? "tab-highlight swell" : "tab-highlight"} />
+        </span>
         {items.map((item) => (
           <button
             key={item.id}
