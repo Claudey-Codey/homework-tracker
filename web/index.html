@@ -20,7 +20,22 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="TaskMng" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <link id="apple-touch-icon" rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <!-- Home Screen web apps get no dark or tinted icon: iOS copies the touch
+         icon once, at Add to Home Screen, and keeps it. So hand it the dark
+         icon when the phone is in dark mode at that moment. Someone who
+         switches appearance later keeps the icon they added. -->
+    <script>
+      (function () {
+        var dark = window.matchMedia("(prefers-color-scheme: dark)");
+        var link = document.getElementById("apple-touch-icon");
+        function update() {
+          link.href = dark.matches ? "./icons/apple-touch-icon-dark.png" : "./icons/apple-touch-icon.png";
+        }
+        update();
+        dark.addEventListener("change", update);
+      })();
+    </script>
     <link rel="icon" type="image/png" href="./icons/icon-192.png" />
     <link rel="manifest" href="./manifest.webmanifest" />
   </head>

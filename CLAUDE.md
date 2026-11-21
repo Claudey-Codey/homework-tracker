@@ -303,6 +303,47 @@ Web: `selectTab` in `App.tsx`, `.tab-pane.entering` and `.tab-highlight` in
   on a device that item 5's path reset doesn't show during the fade; if it
   does, empty the left tab's path after a short delay (about 0.25 s).
 
+### 12. New app icon: the Toggle, with Dark and Tinted versions
+
+Web: `web/scripts/icon.svg`, `icon-dark.svg`, `icon-tinted.svg`, rendered by
+`web/scripts/render-icons.mjs`. The iOS files are ready in
+`web/scripts/ios-app-icon/`.
+
+- The icon is now an iPhone switch turned on, with a tick in its white knob:
+  green track on a white-to-light-grey background. It replaces the blue
+  checklist icon. The iOS app has no app icon yet (no asset catalog), so this
+  is its first.
+- iOS switches app icons with the Home Screen's appearance (Light, Dark,
+  Tinted, iOS 18 and later; iOS 17 always shows Light). Web apps can't: the
+  web only picks the dark Home Screen icon if the phone is in dark mode when
+  it's added. The native app should get all three, like the Claude app:
+  - `AppIcon.png`: Light, opaque, no alpha.
+  - `AppIcon-Dark.png`: the same switch in slightly brighter green, knob
+    `#F2F2F7`, on a clear background. iOS draws its dark background behind it.
+  - `AppIcon-Tinted.png`: greys on a clear background (track and tick
+    `#8A8A8A`, knob white). iOS turns them into the chosen tint colour, the
+    knob being the brightest part.
+- iOS: create `TaskMng/Assets.xcassets/` with a `Contents.json`
+  (`{"info":{"author":"xcode","version":1}}`) and
+  `AppIcon.appiconset/` holding the three PNGs and this `Contents.json`:
+  ```json
+  {
+    "images" : [
+      { "filename" : "AppIcon.png", "idiom" : "universal", "platform" : "ios", "size" : "1024x1024" },
+      { "appearances" : [ { "appearance" : "luminosity", "value" : "dark" } ],
+        "filename" : "AppIcon-Dark.png", "idiom" : "universal", "platform" : "ios", "size" : "1024x1024" },
+      { "appearances" : [ { "appearance" : "luminosity", "value" : "tinted" } ],
+        "filename" : "AppIcon-Tinted.png", "idiom" : "universal", "platform" : "ios", "size" : "1024x1024" }
+    ],
+    "info" : { "author" : "xcode", "version" : 1 }
+  }
+  ```
+  Add `ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon` to the settings in
+  `project.yml`. In the README's manual setup, add a step to drag
+  `Assets.xcassets` into the project (or, if Xcode made its own, drop the
+  three PNGs into its AppIcon set and set Appearances to "Any, Dark,
+  Tinted"). On a device, check all three in Home Screen ▸ Edit ▸ Customize.
+
 ## Working on the web app
 
 - Run commands in `web/`: `npm ci`, `npm run dev`, `npm run typecheck`, and

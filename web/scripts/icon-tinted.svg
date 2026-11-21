@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- The app icon for tinted Home Screens (iOS app only). Grey on a clear
+       background: iOS draws the background and turns the greys into the
+       person's tint colour, the lighter the grey the stronger the tint, so the
+       knob is the brightest part. -->
+  <defs>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <rect x="172" y="342" width="680" height="340" rx="170" fill="#8A8A8A"/>
+  <circle cx="682" cy="512" r="146" fill="#FFFFFF" filter="url(#shadow)"/>
+  <path d="M620 516l42 42 80-88" fill="none" stroke="#8A8A8A" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

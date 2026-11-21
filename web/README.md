@@ -75,8 +75,10 @@ Other files:
 - `sw/sw.js` is the service worker that makes the app work offline.
   `vite.config.ts` fills in its file list at build time.
 - `public/` holds the avatars, sounds, icons and the web app manifest.
-- `scripts/` holds the app icon's source (`icon.svg`) and the script that
-  renders it to PNGs.
+- `scripts/` holds the app icon's sources (`icon.svg`, `icon-dark.svg`,
+  `icon-tinted.svg`) and `render-icons.mjs`, which renders them to the PNGs
+  in `public/icons/` and the iOS app's Light, Dark and Tinted icons in
+  `scripts/ios-app-icon/`.
 
 ## Not there yet
 

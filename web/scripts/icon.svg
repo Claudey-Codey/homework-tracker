@@ -1,24 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- The app icon, light appearance: an iPhone switch turned on, with a tick
+       in the knob. icon-dark.svg and icon-tinted.svg are the same drawing for
+       dark and tinted Home Screens; keep the three in step. -->
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#4AA3FF"/>
-      <stop offset="1" stop-color="#0060F0"/>
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E9EDF4"/>
     </linearGradient>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#002a80" flood-opacity="0.35"/>
+    <linearGradient id="track" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4CD964"/>
+      <stop offset="1" stop-color="#2DB84F"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#0b3d1a" flood-opacity="0.3"/>
     </filter>
   </defs>
-  <rect width="1024" height="1024" fill="url(#bg)"/>
-  <g filter="url(#shadow)">
-    <rect x="232" y="212" width="560" height="600" rx="96" fill="#fff"/>
-  </g>
-  <!-- Ticked first step -->
-  <circle cx="352" cy="378" r="48" fill="#34C759"/>
-  <path d="M328 380l18 18 34-38" fill="none" stroke="#fff" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
-  <rect x="436" y="360" width="256" height="36" rx="18" fill="#C7D7EE"/>
-  <!-- Open steps -->
-  <circle cx="352" cy="512" r="40" fill="none" stroke="#0A6CFF" stroke-width="16"/>
-  <rect x="436" y="494" width="256" height="36" rx="18" fill="#0A6CFF"/>
-  <circle cx="352" cy="646" r="40" fill="none" stroke="#0A6CFF" stroke-width="16"/>
-  <rect x="436" y="628" width="190" height="36" rx="18" fill="#0A6CFF"/>
+  <rect id="background" width="1024" height="1024" fill="url(#bg)"/>
+  <rect x="172" y="342" width="680" height="340" rx="170" fill="url(#track)"/>
+  <rect x="172" y="342" width="680" height="340" rx="170" fill="none" stroke="#000" stroke-opacity="0.06" stroke-width="6"/>
+  <circle cx="682" cy="512" r="146" fill="#fff" filter="url(#shadow)"/>
+  <path d="M620 516l42 42 80-88" fill="none" stroke="#2DB84F" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

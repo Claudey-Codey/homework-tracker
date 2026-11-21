@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- The app icon, dark appearance. The background matches the near-black
+       iOS puts behind dark icons. For the iOS app, render-icons.mjs drops the
+       #background rect, since iOS draws that background itself. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2C2C2E"/>
+      <stop offset="1" stop-color="#0D0D0F"/>
+    </linearGradient>
+    <linearGradient id="track" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3ADD63"/>
+      <stop offset="1" stop-color="#24B24B"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <rect id="background" width="1024" height="1024" fill="url(#bg)"/>
+  <rect x="172" y="342" width="680" height="340" rx="170" fill="url(#track)"/>
+  <circle cx="682" cy="512" r="146" fill="#F2F2F7" filter="url(#shadow)"/>
+  <path d="M620 516l42 42 80-88" fill="none" stroke="#24B24B" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
