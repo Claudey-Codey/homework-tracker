@@ -12,7 +12,7 @@ export const avatarKinds: { id: AvatarKind; label: string }[] = [
 
 /// The built-in avatar images, under `public/avatars`.
 export const avatarPresets = [
-  "aurora", "sunset", "ocean", "mint", "confetti", "violet",
+  "aurora", "cat", "sunset", "ocean", "mint", "confetti", "violet",
   "nebula", "galaxy", "lava", "forest", "bubbles", "peach",
   "citrus", "candy", "blueprint", "slate",
 ] as const;

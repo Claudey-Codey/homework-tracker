@@ -365,3 +365,18 @@ Web: `web/scripts/icon.svg`, `icon-dark.svg`, `icon-tinted.svg`, rendered by
   projection (a tilted A4 rectangle through a pinhole camera), not by placing
   corners by hand, or the straightened page's proportions can't be checked.
 - Comments use `///` above declarations and explain why, in plain sentences.
+
+### 13. Cat avatar preset
+
+Web: `avatarPresets` in `support/account.ts`, image
+`web/public/avatars/avatar-cat.png`.
+
+- A 17th avatar preset, "Cat": the Aurora image (rainbow blur with the yellow
+  and green circles) with a hand-drawn light green cat in the middle, the
+  strokes edged with a soft dark shadow so they show on every colour.
+- It comes second in the Presets grid, right after Aurora, labelled "Cat".
+- iOS: copy `web/public/avatars/avatar-cat.png` (400 × 400) to
+  `TaskMng/Resources/Avatars/`, and add `cat` after `aurora` in
+  `AvatarPreset` in `Support/Account.swift`
+  (`case aurora, cat, sunset, ocean, mint, confetti, violet`). People who made
+  the Xcode project by hand must drag the new PNG into the project.
