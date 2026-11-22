@@ -353,8 +353,11 @@ Web: `avatarPresets` in `support/account.ts`, image
   and green circles) turned into a cat. The yellow circle is the head: two
   pointed ears on top and three whiskers out of each side, all in the same
   yellow. The green circle is the body: a thick tail in the same green rises
-  from its right side and curls over at the top. Flat, no face, no shadow,
-  like the circles.
+  from its right side and curls over at the top. The head has a face: two
+  white eyes, rounded with the top edge slanting down toward the middle,
+  each with an upright oval pupil, and below them a mouth of two triangles
+  meeting at their points, like a bow tie. Pupils and mouth are Aurora's
+  deep purple (#480052). Flat, no shadow, like the circles.
 - It comes second in the Presets grid, right after Aurora, labelled "Cat".
 - iOS: copy `web/public/avatars/avatar-cat.png` (400 × 400) to
   `TaskMng/Resources/Avatars/`, and add `cat` after `aurora` in
