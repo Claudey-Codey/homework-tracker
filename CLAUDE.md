@@ -350,10 +350,11 @@ Web: `avatarPresets` in `support/account.ts`, image
 `web/public/avatars/avatar-cat.png`.
 
 - A 17th avatar preset, "Cat": the Aurora image (rainbow blur with the yellow
-  and green circles) with a flat light green cat sitting in front, in the
-  same solid-shape style as the circles: pointed ears with pink insides,
-  dark eyes, a pink nose, whiskers, two front paws, and a tall tail up the
-  right side that curls over at the top. A soft shadow under it.
+  and green circles) turned into a cat. The yellow circle is the head: two
+  pointed ears on top and three whiskers out of each side, all in the same
+  yellow. The green circle is the body: a thick tail in the same green rises
+  from its right side and curls over at the top. Flat, no face, no shadow,
+  like the circles.
 - It comes second in the Presets grid, right after Aurora, labelled "Cat".
 - iOS: copy `web/public/avatars/avatar-cat.png` (400 × 400) to
   `TaskMng/Resources/Avatars/`, and add `cat` after `aurora` in
