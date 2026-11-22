@@ -350,8 +350,10 @@ Web: `avatarPresets` in `support/account.ts`, image
 `web/public/avatars/avatar-cat.png`.
 
 - A 17th avatar preset, "Cat": the Aurora image (rainbow blur with the yellow
-  and green circles) with a hand-drawn light green cat in the middle, the
-  strokes edged with a soft dark shadow so they show on every colour.
+  and green circles) with a flat light green cat sitting in front, in the
+  same solid-shape style as the circles: pointed ears with pink insides,
+  dark eyes, a pink nose, whiskers, two front paws, and a tall tail up the
+  right side that curls over at the top. A soft shadow under it.
 - It comes second in the Presets grid, right after Aurora, labelled "Cat".
 - iOS: copy `web/public/avatars/avatar-cat.png` (400 × 400) to
   `TaskMng/Resources/Avatars/`, and add `cat` after `aurora` in
