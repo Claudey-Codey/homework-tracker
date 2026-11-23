@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { pickBackupFile, restoreBackup, shareBackup } from "../../support/backup";
 import { checkOn } from "../../support/feedback";
+import { notificationStatus, sendTestNotification, type NotificationStatus } from "../../support/notifications";
 import { keys, useSetting } from "../../support/settings";
 import { accents, appearances, defaultAccentHex, type ThemeAppearance } from "../../support/theme";
 import { Alert } from "../../ui/Alert";
-import { HalfCircleIcon, ImportIcon, MoonIcon, ShareIcon, SunIcon } from "../../ui/icons";
+import { BellFillIcon, HalfCircleIcon, ImportIcon, MoonIcon, ShareIcon, SunIcon } from "../../ui/icons";
 import { ButtonRow, List, Section } from "../../ui/List";
 import { Screen } from "../../ui/NavStack";
 import { Swatches } from "../../ui/Swatches";
@@ -15,11 +16,32 @@ export function SettingsView() {
   const [appearance, setAppearance] = useSetting<ThemeAppearance>(keys.appearance, "system");
   const [feedbackEnabled, setFeedbackEnabled] = useSetting(keys.feedbackEnabled, true);
   const [showTabLabels, setShowTabLabels] = useSetting(keys.showTabLabels, true);
-  const [backupMessage, setBackupMessage] = useState<{ title: string; message: string } | null>(null);
+  const [alertMessage, setAlertMessage] = useState<{ title: string; message: string } | null>(null);
+  const [notifications, setNotifications] = useState<NotificationStatus>(notificationStatus);
+
+  // Pick up a change made in the iPhone's Settings while the app was in the
+  // background.
+  useEffect(() => {
+    const refresh = () => setNotifications(notificationStatus());
+    document.addEventListener("visibilitychange", refresh);
+    return () => document.removeEventListener("visibilitychange", refresh);
+  }, []);
+
+  const testNotification = async () => {
+    const result = await sendTestNotification();
+    setNotifications(notificationStatus());
+    if (result === "unsupported") {
+      setAlertMessage({ title: "Notifications Not Available", message: notificationFooters.unsupported });
+    } else if (result === "denied") {
+      setAlertMessage({ title: "Notifications Are Off", message: notificationFooters.denied });
+    } else if (result === "failed") {
+      setAlertMessage({ title: "Couldn't Send", message: "Something went wrong showing the notification. Try again." });
+    }
+  };
 
   const backUp = () =>
     shareBackup().catch(() =>
-      setBackupMessage({ title: "Couldn't Back Up", message: "Something went wrong making the backup. Try again." }),
+      setAlertMessage({ title: "Couldn't Back Up", message: "Something went wrong making the backup. Try again." }),
     );
 
   const restore = () =>
@@ -27,12 +49,12 @@ export function SettingsView() {
       try {
         const summary = await restoreBackup(file);
         const count = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
-        setBackupMessage({
+        setAlertMessage({
           title: "Backup Restored",
           message: `Added ${count(summary.assignments, "assignment")}, ${count(summary.exams, "exam")} and ${count(summary.subjects, "subject")}.`,
         });
       } catch (error) {
-        setBackupMessage({ title: "Couldn't Restore", message: (error as Error).message });
+        setAlertMessage({ title: "Couldn't Restore", message: (error as Error).message });
       }
     });
 
@@ -70,6 +92,14 @@ export function SettingsView() {
           />
         </Section>
 
+        <Section header="Notifications" footer={notificationFooters[notifications]}>
+          <ButtonRow
+            icon={<BellFillIcon size={20} />}
+            label="Send Test Notification"
+            onClick={() => void testNotification()}
+          />
+        </Section>
+
         <Section
           header="Backup"
           footer="Everything lives on this iPhone, inside the Home Screen app. Removing the app from the Home Screen deletes it, so back up first. Restoring adds the backup's items back and leaves anything already here alone."
@@ -90,13 +120,24 @@ export function SettingsView() {
       </List>
 
       <Alert
-        title={backupMessage?.title ?? ""}
-        message={backupMessage?.message ?? null}
-        onClose={() => setBackupMessage(null)}
+        title={alertMessage?.title ?? ""}
+        message={alertMessage?.message ?? null}
+        onClose={() => setAlertMessage(null)}
       />
     </Screen>
   );
 }
+
+/// What the test does, or why it can't, for each permission state. The
+/// unsupported and denied texts double as the alert's message.
+const notificationFooters: Record<NotificationStatus, string> = {
+  default:
+    "Shows a notification on this iPhone right away. The first time, you'll be asked to allow notifications from TaskMng.",
+  granted: "Shows a notification on this iPhone right away, to check that TaskMng can send them.",
+  denied: "Notifications are turned off for TaskMng. Turn them on in the iPhone's Settings app, under Notifications, then TaskMng.",
+  unsupported:
+    "Notifications only work in the Home Screen app, on iOS 16.4 or later. In Safari, tap Share, then Add to Home Screen, and open TaskMng from there.",
+};
 
 const symbols: Record<ThemeAppearance, React.ReactNode> = {
   system: <HalfCircleIcon size={14} />,

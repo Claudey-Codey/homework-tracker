@@ -386,3 +386,42 @@ Web: `avatarPresets` in `support/account.ts`, image
   projection (a tilted A4 rectangle through a pinhole camera), not by placing
   corners by hand, or the straightened page's proportions can't be checked.
 - Comments use `///` above declarations and explain why, in plain sentences.
+
+### 14. Send Test Notification in Settings
+
+Web: `support/notifications.ts`, the Notifications section in
+`views/settings/SettingsView.tsx`, `notificationclick` in `web/sw/sw.js`.
+
+- Settings gets a section after Sounds & Haptics: header "Notifications",
+  one button row with the `bell.fill` symbol labelled "Send Test
+  Notification".
+- Tapping it asks for notification permission if it hasn't been asked yet,
+  then shows a notification straight away: title "Test Notification", body
+  "Notifications from TaskMng are working.", default sound. A repeat test
+  replaces the previous one (same identifier, "taskmng-test").
+- The footer depends on the permission:
+  - not asked yet: "Shows a notification on this iPhone right away. The
+    first time, you'll be asked to allow notifications from TaskMng."
+  - allowed: "Shows a notification on this iPhone right away, to check that
+    TaskMng can send them."
+  - denied: "Notifications are turned off for TaskMng. Turn them on in the
+    iPhone's Settings app, under Notifications, then TaskMng."
+  Re-read the permission when the app comes back to the foreground
+  (`scenePhase == .active`), so a change made in the Settings app shows.
+- When permission is denied, tapping the button shows an alert titled
+  "Notifications Are Off" with the denied footer text as its message and an
+  OK button. (The web also has a "not available" case for Safari tabs; iOS
+  doesn't need it.)
+- Tapping the notification opens the app (iOS does this by itself).
+- iOS: in `Support/NotificationManager.swift` add `authorizationStatus()`
+  and `sendTest() async -> Bool` (request authorisation when
+  `.notDetermined`; return false unless `.authorized`/`.provisional`; add a
+  `UNNotificationRequest` with identifier "taskmng-test" and a
+  `UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)`).
+  The app is open when the test fires, and iOS hides notifications from an
+  app in the foreground unless it says otherwise, so make
+  `NotificationManager` (or a small class set up in `TaskMngApp.swift`) the
+  `UNUserNotificationCenter.current().delegate` and return
+  `[.banner, .list, .sound]` from `willPresent`. That also shows reminders
+  that fire while the app is open. The section goes in
+  `Views/Settings/SettingsView.swift`.

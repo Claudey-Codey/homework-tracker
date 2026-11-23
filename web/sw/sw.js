@@ -64,3 +64,14 @@ self.addEventListener("fetch", (event) => {
     ),
   );
 });
+
+// Tapping a notification brings the app forward, or opens it if it was closed.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
+      const open = windows.find((client) => "focus" in client);
+      return open ? open.focus() : self.clients.openWindow("./");
+    }),
+  );
+});
